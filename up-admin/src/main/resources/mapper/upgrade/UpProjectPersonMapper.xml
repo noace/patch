@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpProjectPersonMapper">
+    
+    <resultMap type="UpProjectPerson" id="UpProjectPersonResult">
+        <result property="projectProductId"    column="project_product_id"    />
+        <result property="userId"    column="user_id"    />
+	    <result property="userName"    column="user_name"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectUpProjectPersonVo">
+        SELECT
+            up.project_product_id,
+            up.user_id,
+            su.user_name,
+            up.create_by,
+            up.create_time,
+            up.update_by,
+            up.update_time,
+            up.del_flag,
+            up.remark
+        FROM
+            up_project_person up
+        INNER JOIN sys_user su
+        ON su.user_id = up.user_id
+    </sql>
+
+    <select id="selectUpProjectPersonList" parameterType="UpProjectPerson" resultMap="UpProjectPersonResult">
+        <include refid="selectUpProjectPersonVo"/>
+        <where>
+        </where>
+    </select>
+    
+    <select id="selectUpProjectPersonById" parameterType="Integer" resultMap="UpProjectPersonResult">
+        <include refid="selectUpProjectPersonVo"/>
+        where up.project_product_id = #{projectProductId}
+        and up.del_flag != "Y"
+    </select>
+
+    <select id="selectUpProjectPersonByUserId" parameterType="Long" resultMap="UpProjectPersonResult">
+        <include refid="selectUpProjectPersonVo"/>
+        where up.user_id = #{userId}
+        and up.del_flag != "Y"
+    </select>
+    
+    <insert id="insertUpProjectPerson" parameterType="UpProjectPerson">
+        insert into up_project_person
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectProductId != null">project_product_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectProductId != null">#{projectProductId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpProjectPerson" parameterType="UpProjectPerson">
+        update up_project_person
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where project_product_id = #{projectProductId}
+    </update>
+
+    <delete id="deleteUpProjectPersonById" parameterType="Integer">
+        delete from up_project_person where project_product_id = #{projectProductId}
+    </delete>
+
+    <delete id="deleteUpProjectPersonByIds" parameterType="String">
+        update up_project_person set del_flag = 'Y', update_time=sysdate() where project_product_id in
+        <foreach item="projectProductId" collection="array" open="(" separator="," close=")">
+            #{projectProductId}
+        </foreach>
+    </delete>
+
+</mapper>

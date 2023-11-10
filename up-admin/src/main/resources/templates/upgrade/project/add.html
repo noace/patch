@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增项目')" />
+    <th:block th:include="include :: select2-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-project-add">
+            <div class="form-group">    
+                <label class="col-sm-3 control-label is-required">项目名：</label>
+                <div class="col-sm-8">
+                    <input name="projectName" class="form-control" type="text" required>
+                </div>
+            </div>
+
+            <!--<div class="form-group">-->
+                <!--<label class="col-sm-3 control-label">子项目名：</label>-->
+                <!--<div class="col-sm-8">-->
+                    <!--<select id="subProject" name="subProject" class="form-control select2-multiple" multiple>-->
+                        <!--<option th:each="project:${projects}" th:value="${project.projectId}" th:text="${project.projectName}"></option>-->
+                    <!--</select>-->
+                <!--</div>-->
+            <!--</div>-->
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">备注：</label>
+                <div class="col-sm-8">
+                    <textarea name="remark" class="form-control"></textarea>
+                </div>
+            </div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: select2-js" />
+    <script th:inline="javascript">
+        var prefix = ctx + "upgrade/project"
+        $("#form-project-add").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-project-add').serialize());
+            }
+        }
+
+        $(function() {
+            $('#subProject').select2({
+                placeholder: "请选择子项目",
+                allowClear: true
+            });
+        })
+    </script>
+</body>
+</html>

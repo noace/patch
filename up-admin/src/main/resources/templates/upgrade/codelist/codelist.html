@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('补丁包代码列列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>补丁ID：</label>
+                                <input type="text" name="patchId"/>
+                            </li>
+                            <li>
+                                <label>产品ID：</label>
+                                <input type="text" name="productId"/>
+                            </li>
+                            <li>
+                                <label>项目ID：</label>
+                                <input type="text" name="projectId"/>
+                            </li>
+                            <li>
+                                <label>代码路径：</label>
+                                <input type="text" name="codePath"/>
+                            </li>
+                            <li>
+                                <label>文件类型,java文件：JAVA,SQL文件：SQL,其他文件：OTHER：</label>
+                                <select name="fileType">
+                                    <option value="">所有</option>
+                                    <option value="-1">代码生成请选择字典属性</option>
+                                </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="upgrade:codelist:add">
+                    <i class="fa fa-plus"></i> 添加
+                </a>
+                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="upgrade:codelist:edit">
+                    <i class="fa fa-edit"></i> 修改
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="upgrade:codelist:remove">
+                    <i class="fa fa-remove"></i> 删除
+                </a>
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="upgrade:codelist:export">
+                    <i class="fa fa-download"></i> 导出
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('upgrade:codelist:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('upgrade:codelist:remove')}]];
+        var prefix = ctx + "upgrade/codelist";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "补丁包代码列",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'codeId',
+                    title: '代码ID',
+                    visible: false
+                },
+                {
+                    field: 'patchId',
+                    title: '补丁ID'
+                },
+                {
+                    field: 'productId',
+                    title: '产品ID'
+                },
+                {
+                    field: 'projectId',
+                    title: '项目ID'
+                },
+                {
+                    field: 'codePath',
+                    title: '代码路径'
+                },
+                {
+                    field: 'fileType',
+                    title: '文件类型,java文件：JAVA,SQL文件：SQL,其他文件：OTHER'
+                },
+                {
+                    field: 'remark',
+                    title: '备注'
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.codeId + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.codeId + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

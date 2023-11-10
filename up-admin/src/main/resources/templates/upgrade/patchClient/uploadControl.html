@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('上传补丁包')" />
+    <th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>上传补丁包</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="form-group">
+                            <div class="file-loading">
+                                <input id="fileinput" type="file" name="file" multiple>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: bootstrap-fileinput-js" />
+    <script th:inline="javascript">
+        var prefix = ctx + "upgrade/patchClient";
+
+        // 文件索引
+        var fileIndex = 0;
+        $("#fileinput").fileinput({
+            uploadUrl: ctx + 'common/upload',
+            autoReplace: true,
+            allowedFileExtensions: ['zip', 'rar' , '7z']
+        }).on('fileuploaded', function (event, data, previewId, index) {
+            var upPatchCilent = {};
+            if (data.response.code != 0) {
+                $.modal.alertError("文件上传失败！");
+                return;
+            }
+
+            upPatchCilent.patchFileName = data.files[fileIndex++].name;
+
+            $.get(prefix + "/uploadPatchFile", upPatchCilent, function(result) {
+                if (result.code == web_status.SUCCESS) {
+                    $.modal.alertSuccess("文件上传成功！");
+                    parent.$.table.refresh();
+                } else if (result.code == web_status.WARNING) {
+                    $.modal.alertWarning(result.msg);
+                } else {
+                    $.modal.alertError(result.msg);
+                }
+            });
+        })
+        //     .on('fileremoved', function (event, id, index) {
+        //     debugger;
+        //     console.log(data);
+        //     $("input[name='" + event.currentTarget.id + "']").val('')
+        // })
+    </script>
+    <th:block th:include="include :: select2-js" />
+    <th:block th:include="include :: bootstrap-select-js" />
+</body>
+</html>

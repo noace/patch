@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改项目产品')" />
+    <th:block th:include="include :: datetimepicker-css" />
+    <th:block th:include="include :: select2-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-projectProduct-edit" th:object="${upProjectProduct}">
+            <input id="projectProductId" name="projectProductId" th:field="*{projectProductId}" type="hidden">
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">产品：</label>
+                <div class="col-sm-8">
+                    <select id="productId" name="productId" class="form-control m-b" th:with="plist=${@upHelper.getProductList()}" required>
+                        <option th:each="product : ${plist}" th:text="${product.productName}" th:value="${product.productId}" th:field="*{productId}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required" id="projectLabel">项目：</label>
+                <div class="col-sm-8">
+                    <select id="projectId" name="projectId" class="form-control m-b" th:with="plist=${@upHelper.getProjectList()}" required>
+                        <option th:each="project : ${plist}" th:text="${project.projectName}" th:value="${project.projectId}" th:field="*{projectId}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">子项目名：</label>
+                <div class="col-sm-8">
+                    <select id="subProject" name="subProject" class="form-control select2-multiple" multiple onchange="validateSupProjectId()">
+                        <option th:each="pp:${ppList}" th:value="${pp.projectId}" th:text="${pp.projectName}" th:selected="${pp.flag}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">升级负责人：</label>
+                <div class="col-sm-8">
+                    <select id="post" name="productPrincipalIds" class="form-control select2-multiple" multiple>
+                        <option th:each="user:${users}" th:value="${user.userId}"  th:selected="${user.flag}"  th:text="${user.userName}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <!--TODO branch-->
+                <!--<label class="col-sm-3 control-label is-required">分支类型：</label>-->
+                <label class="col-sm-3 control-label">分支类型：</label>
+                <div class="col-sm-8">
+                    <!--TODO branch-->
+                    <!--<select id="branchType" name="branchType" class="form-control m-b" th:with="type=${@dict.getType('patch_branch_type')}" required>-->
+                    <select id="branchType" name="branchType" class="form-control m-b" th:with="type=${@dict.getType('patch_branch_type')}" >
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue} " th:field="*{branchType}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">代码分支：</label>
+                <div class="col-sm-8">
+                    <input id="sourceBranchName" name="sourceBranchName" th:field="*{sourceBranchName}" class="form-control" type="text" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">一键升级：</label>
+                <div class="col-sm-8">
+                    <select id="autoUpgradeFlag" name="autoUpgradeFlag" class="form-control m-b" th:with="type=${@dict.getType('auto_upgrade_flag')}" required>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" th:field="*{autoUpgradeFlag}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">执行标准库：</label>
+                <div class="col-sm-8">
+                    <select id="excuteFlag" name="excuteFlag" class="form-control m-b" th:with="type=${@dict.getType('excute_flag')}" required>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" th:field="*{excuteFlag}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">执行开发库：</label>
+                <div class="col-sm-8">
+                    <select id="excuteDevFlag" name="excuteDevFlag" class="form-control m-b" th:with="type=${@dict.getType('excute_dev_flag')}" required>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" th:field="*{excuteDevFlag}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">是否测试：</label>
+                <div class="col-sm-8">
+                    <select id="testFlag" name="testFlag" class="form-control m-b" th:with="type=${@dict.getType('test_flag')}" required onchange="onchangeByTestFlag()">
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" th:field="*{testFlag}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">编译方式：</label>
+                <div class="col-sm-8">
+                    <select id="buildType" name="buildType" class="form-control m-b" th:with="type=${@dict.getType('build_type')}" required>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" th:field="*{buildType}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">打包分支：</label>
+                <div class="col-sm-8">
+                    <select id="patchBranch" name="patchBranch" class="form-control m-b" th:with="type=${@dict.getType('patch_branch')}" required>
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" th:field="*{patchBranch}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">项目经理：</label>
+                <div class="col-sm-8">
+                    <select id="projectPrincipalId" name="projectPrincipalId" class="form-control select2-multiple" multiple>
+                        <option th:each="projectUser:${projectUsers}" th:value="${projectUser.userId}"  th:selected="${projectUser.flag}"  th:text="${projectUser.userName}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">测试负责人：</label>
+                <div class="col-sm-8">
+                    <select id="testPrincipal" name="testPrincipal" class="form-control">
+                        <option value="" >--请选择测试负责人--</option>
+                        <option th:each="testPrincipal:${testPrincipals}" th:value="${testPrincipal.userId}" th:text="${testPrincipal.userName}" th:field="*{testPrincipal}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label is-required">打包优先级：</label>
+                <div class="col-sm-8">
+                    <input id="patchRank" name="patchRank" class="form-control" type="text" required onblur="validateNumber()" th:field="*{patchRank}">
+                </div>
+            </div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: datetimepicker-js" />
+    <th:block th:include="include :: select2-js" />
+    <script th:inline="javascript">
+        var prefix = ctx + "upgrade/projectProduct";
+        $("#form-projectProduct-edit").validate({
+            focusCleanup: true
+        });
+
+        // 如果项目走测试流程，测试负责人必填
+        function onchangeByTestFlag() {
+            var testFlag = $('#testFlag').val();
+            if ('Y' == testFlag) {
+                $('#testPrincipal').attr('required','required');
+            } else {
+                $('#testPrincipal').removeAttr('required');
+            }
+        }
+
+        // 校验子项目是否包含父项目
+        function validateSupProjectId() {
+            var projectId = $.form.selectSelects("projectId");
+            if($('#subProject').val().indexOf(projectId) > -1) {
+                $.modal.confirm("子项目包含父项目，请重新选择,否则无法输入代码分支！");
+                $('#sourceBranchName').attr('disabled','disabled');
+            } else {
+                $('#sourceBranchName').removeAttr('disabled');
+            }
+        }
+
+        // 正则校验是否为纯数字
+        function validateNumber() {
+            var patchRank = $('#patchRank').val();
+            var reg = /^[0-9]+([.][0-9]+)?$/;
+            var regExp = new RegExp(reg);
+            if (!regExp.test(patchRank)) {
+                $.modal.msgWarning("请输入数字！");
+            }
+        }
+
+        function submitHandler() {
+
+            var testFlag = $('#testFlag').val();
+            if ('Y' == testFlag) {
+                $('#testPrincipal').attr('required','required');
+            } else {
+                $('#testPrincipal').removeAttr('required');
+            }
+
+            if ($.validate.form()) {
+                // $.operate.save(prefix + "/edit", $('#form-projectProduct-edit').serialize());
+                var data = [];
+                var productPrincipalIds = $.form.selectSelects("post");
+                var productId = $.form.selectSelects("productId");
+                var projectId = $.form.selectSelects("projectId");
+                var branchType = $.form.selectSelects("branchType");
+                var sourceBranchName = $('#sourceBranchName').val();
+                var dbVersion = $('#dbVersion').val();
+                var minServerVersion = $('#minServerVersion').val();
+                var maxServerVersion = $('#maxServerVersion').val();
+                var lastUpgradeTime = $('#lastUpgradeTime').val();
+                var projectProductId = $('#projectProductId').val();
+                var autoUpgradeFlag = $.form.selectSelects("autoUpgradeFlag");
+                var excuteFlag = $.form.selectSelects("excuteFlag");
+                var excuteDevFlag = $.form.selectSelects("excuteDevFlag");
+                var test = $.form.selectSelects("testFlag");
+                var buildType = $.form.selectSelects("buildType");
+                var patchBranch = $.form.selectSelects("patchBranch");
+                var projectPrincipalId = $.form.selectSelects("projectPrincipalId");
+                var testPrincipal = $.form.selectSelects("testPrincipal");
+                var subProjectIds = $.form.selectSelects("subProject");
+                var patchRank = $('#patchRank').val();
+
+                data.push({"name": "productPrincipalIds", "value": productPrincipalIds});
+                data.push({"name": "projectId", "value": projectId});
+                data.push({"name": "productId", "value": productId});
+                data.push({"name": "sourceBranchName", "value": sourceBranchName});
+                data.push({"name": "branchType", "value": branchType});
+                data.push({"name": "dbVersion", "value": dbVersion});
+                data.push({"name": "minServerVersion", "value": minServerVersion});
+                data.push({"name": "maxServerVersion", "value": maxServerVersion});
+                data.push({"name": "lastUpgradeTime", "value": lastUpgradeTime});
+                data.push({"name": "projectProductId", "value": projectProductId});
+                data.push({"name": "autoUpgradeFlag", "value": autoUpgradeFlag});
+                data.push({"name": "excuteFlag", "value": excuteFlag});
+                data.push({"name": "excuteDevFlag", "value": excuteDevFlag});
+                data.push({"name": "testFlag", "value": test});
+                data.push({"name": "buildType", "value": buildType});
+                data.push({"name": "patchBranch", "value": patchBranch});
+                data.push({"name": "projectPrincipalId", "value": projectPrincipalId});
+                data.push({"name": "testPrincipal", "value": testPrincipal});
+                data.push({"name": "subProjectId", "value": subProjectIds});
+                data.push({"name": "patchRank", "value": patchRank});
+                $.operate.save(prefix + "/edit", data);
+            }
+        }
+
+        $("input[name='lastUpgradeTime']").datetimepicker({
+            format: "yyyy-mm-dd",
+            minView: "month",
+            autoclose: true
+        });
+
+        $(function() {
+            $('#post').select2({
+                placeholder: "请选择升级负责人",
+                allowClear: true
+            });
+            $('#projectPrincipalId').select2({
+                placeholder: "请选择项目经理",
+                allowClear: true
+            });
+            $('#subProject').select2({
+                placeholder: "请选择子项目",
+                allowClear: true
+            });
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpWorkspaceSourceMapper">
+    
+    <resultMap type="UpWorkspaceSource" id="UpWorkspaceSourceResult">
+        <result property="sourceId"    column="source_id"    />
+        <result property="productId"    column="product_id"    />
+        <result property="sourceState"    column="source_state"    />
+        <result property="sourceUrl"    column="source_url"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectUpWorkspaceSourceVo">
+        select source_id, product_id, source_state, source_url, create_by, create_time, update_by, update_time, del_flag, remark from up_workspace_source
+    </sql>
+
+    <select id="selectUpWorkspaceSourceList" parameterType="UpWorkspaceSource" resultMap="UpWorkspaceSourceResult">
+        <include refid="selectUpWorkspaceSourceVo"/>
+        <where>  
+            <if test="productId != null "> and product_id = #{productId}</if>
+            <if test="sourceState != null "> and source_state = #{sourceState}</if>
+            <if test="sourceUrl != null  and sourceUrl != ''"> and source_url = #{sourceUrl}</if>
+        </where>
+    </select>
+    
+    <select id="selectUpWorkspaceSourceById" parameterType="Long" resultMap="UpWorkspaceSourceResult">
+        <include refid="selectUpWorkspaceSourceVo"/>
+        where source_id = #{sourceId}
+    </select>
+
+    <select id="selectUpWorkspaceSourceOld" parameterType="int" resultMap="UpWorkspaceSourceResult">
+        <include refid="selectUpWorkspaceSourceVo"/>
+        where
+            del_flag != 'Y'
+            and source_state = 0
+            and product_id = #{productId}
+        order by update_time
+        limit 1
+    </select>
+
+    <insert id="insertUpWorkspaceSource" parameterType="UpWorkspaceSource" useGeneratedKeys="true" keyProperty="sourceId">
+        insert into up_workspace_source
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="productId != null">product_id,</if>
+            <if test="sourceState != null">source_state,</if>
+            <if test="sourceUrl != null and sourceUrl != ''">source_url,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null and updateBy != ''">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="productId != null">#{productId},</if>
+            <if test="sourceState != null">#{sourceState},</if>
+            <if test="sourceUrl != null and sourceUrl != ''">#{sourceUrl},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpWorkspaceSource" parameterType="UpWorkspaceSource">
+        update up_workspace_source
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="productId != null">product_id = #{productId},</if>
+            <if test="sourceState != null">source_state = #{sourceState},</if>
+            <if test="sourceUrl != null and sourceUrl != ''">source_url = #{sourceUrl},</if>
+            <if test="createBy != null and createBy != ''">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where source_id = #{sourceId}
+    </update>
+
+    <delete id="deleteUpWorkspaceSourceById" parameterType="Long">
+        update up_workspace_source set del_flag = 'Y', update_time=sysdate() where source_id = #{sourceId}
+    </delete>
+
+    <delete id="deleteUpWorkspaceSourceByIds" parameterType="String">
+        update up_workspace_source set del_flag = 'Y', update_time=sysdate() where source_id in
+        <foreach item="sourceId" collection="array" open="(" separator="," close=")">
+            #{sourceId}
+        </foreach>
+    </delete>
+
+</mapper>

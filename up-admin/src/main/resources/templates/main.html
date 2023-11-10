@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>统计</title>
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="../static/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link href="../static/css/animate.min.css" th:href="@{/css/animate.min.css}" rel="stylesheet"/>
+    <link href="../static/css/style.min.css" th:href="@{/css/style.min.css}" rel="stylesheet"/>
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content">
+
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <button name="failnum" style="margin-top: -10px" class="btn btn-outline btn-success btn-sm pull-right active" type="button">当日</button>
+                        <button name="failnum" style="margin-top: -10px" class="btn btn-outline btn-success btn-sm pull-right" type="button">本月</button>
+                        <button name="failnum" style="margin-top: -10px" class="btn btn-outline btn-success btn-sm pull-right" type="button">全年</button>
+                        <h5>打包</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 id="failnum" class="no-margins">0</h1>
+                        <div id="failnumPercent" class="stat-percent font-bold text-navy">0% <i class="fa fa-level-up"></i>
+                        </div>
+                        <small>总打包次数</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <button name="publish" style="margin-top: -10px" class="btn btn-outline btn-success btn-sm pull-right active" type="button">当日</button>
+                        <button name="publish" style="margin-top: -10px" class="btn btn-outline btn-success btn-sm pull-right" type="button">本月</button>
+                        <button name="publish" style="margin-top: -10px" class="btn btn-outline btn-success btn-sm pull-right" type="button">全年</button>
+                        <h5>发包</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 id="publish" class="no-margins">0</h1>
+                        <div id="publishPercent" class="stat-percent font-bold text-success">0% <i class="fa fa-bolt"></i>
+                        </div>
+                        <small>总发包次数</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <button name="upgrades" style="margin-top: -10px" class="btn btn-outline btn-success btn-sm pull-right active" type="button">当日</button>
+                        <button name="upgrades" style="margin-top: -10px" class="btn btn-outline btn-success btn-sm pull-right" type="button">本月</button>
+                        <button name="upgrades" style="margin-top: -10px" class="btn btn-outline btn-success btn-sm pull-right" type="button">全年</button>
+                        <h5>升级</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 id="upgrades" class="no-margins">0</h1>
+                        <div id="upgradesPercent" class="stat-percent font-bold text-info">0% <i class="fa fa-level-up"></i>
+                        </div>
+                        <small>总升级次数</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-danger pull-right">最近一个月</span>
+                        <h5>活跃用户</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 id="activeUser" class="no-margins">0</h1>
+                        <div id="activeUserPercent" class="stat-percent font-bold text-danger">0% <i class="fa fa-level-down"></i>
+                        </div>
+                        <small th:text="${#dates.format(date, 'MM')}+'月'">11月</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>升级</h5>
+                        <!--<div class="pull-right">-->
+                            <!--<div class="btn-group">-->
+                                <!--<button type="button" class="btn btn-xs btn-white active">天</button>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    </div>
+                    <div class="ibox-content">
+                        <div class="row">
+                            <div class="col-sm-9">
+                                <div class="flot-chart">
+                                    <div class="flot-chart-content" id="flot-dashboard-chart"></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <ul class="stat-list">
+                                    <li>
+                                        <h2 id="allMonthPublish" class="no-margins">0</h2>
+                                        <small>发包总数</small>
+                                        <div class="progress progress-mini">
+                                            <div style="width: 48%;" class="progress-bar"></div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <h2 id="oneMonthPublish" class="no-margins ">0</h2>
+                                        <small>最近一个月发包数</small>
+                                        <div class="progress progress-mini">
+                                            <div style="width: 60%;" class="progress-bar"></div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <h2 id="oneMonthUpgrades" class="no-margins ">0</h2>
+                                        <small>最近一个月正常升级数</small>
+                                        <div class="progress progress-mini">
+                                            <div style="width: 22%;" class="progress-bar"></div>
+                                        </div>
+                                    </li>
+                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>活跃项目列表</h5>
+                        <div class="ibox-tools">
+                            <a class="collapse-link">
+                                <i class="fa fa-chevron-up"></i>
+                            </a>
+                            <a class="close-link">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="ibox-content">
+                        <table class="table table-hover no-margins">
+                            <thead>
+                                <tr>
+                                    <th>项目</th>
+                                    <th>最新发包任务</th>
+                                    <th>最新发包时间</th>
+                                    <th>最新升级时间</th>
+                                    <th>近一个月总发包数</th>
+                                    <th>近一个月总升级数</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="user: ${activeProjectLis}">
+                                <td th:text="${user.projectName}"></td>
+                                <td th:text="${user.jiraNo}"></td>
+                                <td th:text="${user.newUpdateTime}"></td>
+                                <td th:text="${user.lastUpgradeTime}"></td>
+                                <td th:text="${user.oneMonthPublish}"></td>
+                                <td th:text="${user.oneMonthUpgrade}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+         </div>
+      </div>
+    </div>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/ajax/libs/flot/jquery.flot.js}"></script>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: sparkline-js" />
+    <th:block th:include="include :: datetimepicker-js" />
+    <th:block th:include="include :: echarts-js" />
+    <th:block th:include="include :: sparkline-js" />
+    <script th:inline="javascript" type="text/javascript">
+        var myChart;
+	    $(document).ready(function () {
+               debugger
+            publish("当日","publish");
+            publish("当日","upgrades");
+            publish("当日","failnum");
+            var dom = document.getElementById('flot-dashboard-chart');
+            myChart = echarts.init(dom, null, {
+                renderer: 'canvas',
+                useDirtyRect: false
+            });
+
+            var option;
+
+            option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        crossStyle: {
+                            color: '#ece5e5'
+                        }
+                    }
+                },
+                toolbox: {
+                    feature: {
+                        dataView: { show: true, readOnly: false },
+                        magicType: { show: true, type: ['line', 'bar'] },
+                        restore: { show: true },
+                        saveAsImage: { show: true }
+                    }
+                },
+                legend: {
+                    // data: ['Evaporation', 'Precipitation', 'Temperature']
+                    data: ['发包数', '升级数']
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisTick: {
+                            alignWithLabel: true
+                        },
+                        data: [] ,
+                        // axisPointer: {
+                        //     type: 'shadow'
+                        // },
+                        axisLabel: {
+                            formatter: '{value}'
+                        }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '数量',
+                        // min: 0,
+                        // max: 200,
+                        // interval: 30,
+                        axisLabel: {
+                            formatter: '{value}'
+                        }
+                    }
+                ],
+                series: [
+                    {
+                        name: '发包数',
+                        type: 'bar',
+                        tooltip: {
+                            valueFormatter: function (value) {
+                                return value;
+                            }
+                        },
+                        data: [],
+                        itemStyle:{color:'#5470C6'}
+                    },
+                    {
+                        name: '升级数',
+                        type: 'bar',
+                        tooltip: {
+                            valueFormatter: function (value) {
+                                return value;
+                            }
+                        },
+                        data: [],
+                    }
+                ]
+            };
+            if (option && typeof option === 'object') {
+                myChart.setOption(option);
+            }
+            window.addEventListener('resize', myChart.resize);
+            loadStatisticsChart();
+	    });
+        var prefix = ctx;
+        function publish(value,type){
+            var url = prefix+"/searchPublish";
+            $.ajax({
+                url:url,
+                type:"post",
+                cache: true,
+                data: "value=" + value+ "&type=" + type,
+                success:function(reply){
+                    if (reply == '' || reply == null) {
+                        $.modal.msgWarning(reply.msg);
+                    } else if(reply.code == 500){
+                        $.modal.msgWarning(reply.msg);
+                    } else {
+                        if (type=="publish"){
+                            $('#publish').html(reply.data.sum);
+                            if (reply.data.percent.indexOf("-")==-1){
+                                $('#publishPercent').html(reply.data.percent);
+                                document.getElementById("publishPercent").innerHTML+="<i class=\"fa fa-level-up\"></i>";
+                            }else {
+                                $('#publishPercent').html(reply.data.percent.slice(1));
+                                document.getElementById("publishPercent").innerHTML+="<i class=\"fa fa-level-down\"></i>";
+                            }
+                        }else if (type=="upgrades"){
+                            $('#upgrades').html(reply.data.sum);
+                            if (reply.data.percent.indexOf("-")==-1){
+                                $('#upgradesPercent').html(reply.data.percent);
+                                document.getElementById("upgradesPercent").innerHTML+="<i class=\"fa fa-level-up\"></i>";
+                            }else {
+                                $('#upgradesPercent').html(reply.data.percent.slice(1));
+                                document.getElementById("upgradesPercent").innerHTML+="<i class=\"fa fa-level-down\"></i>";
+                            }
+                        }else {
+                            $('#failnum').html(reply.data.sum);
+                            if (reply.data.percent.indexOf("-")==-1){
+                                $('#failnumPercent').html(reply.data.percent);
+                                document.getElementById("failnumPercent").innerHTML+="<i class=\"fa fa-level-up\"></i>";
+                            }else {
+                                $('#failnumPercent').html(reply.data.percent.slice(1));
+                                document.getElementById("failnumPercent").innerHTML+="<i class=\"fa fa-level-down\"></i>";
+                            }
+                        }
+
+                    }
+                }
+            });
+        }
+
+
+        var arr = document.getElementsByClassName("btn btn-outline btn-success btn-sm pull-right");
+        for(let i=0;i<arr.length;i++){
+            arr[i].onclick=function(){
+                var name = arr[i].name;
+                arr[i].classList.add("active");
+                for(let j=0;j<arr.length;j++){
+                    if(j!=i && name==arr[j].name){
+                        arr[j].classList.remove("active");
+                    }
+                }
+                publish(arr[i].innerText,arr[i].name)
+            }
+        }
+        function loadStatisticsChart(){
+            var url = prefix+"/loadStatisticsChart";
+            $.ajax({
+                url:url,
+                type:"post",
+                cache: true,
+                success:function(reply){
+                    if (reply == '' || reply == null) {
+                        $.modal.msgWarning(reply.msg);
+                    } else if(reply.code == 500){
+                        $.modal.msgWarning(reply.msg);
+                    } else {
+                        $('#allMonthPublish').html(reply.data.allMonthPublish);
+                        $('#oneMonthPublish').html(reply.data.oneMonthPublish);
+                        $('#oneMonthUpgrades').html(reply.data.oneMonthUpgrades);
+                        $('#activeUser').html(reply.data.activeUser);
+                        if (reply.data.activeUserPercent.indexOf("-")==-1){
+                            $('#activeUserPercent').html(reply.data.activeUserPercent);
+                            document.getElementById("activeUserPercent").innerHTML+="<i class=\"fa fa-level-up\"></i>";
+                        }else {
+                            $('#activeUserPercent').html(reply.data.activeUserPercent.slice(1));
+                            document.getElementById("activeUserPercent").innerHTML+="<i class=\"fa fa-level-down\"></i>";
+                        }
+
+                        myChart.setOption({
+                            xAxis: {
+                                data: reply.data.timeList
+                            },
+                            series: [
+                                {
+                                    data: reply.data.countUpPatchList
+                                },
+                                {
+                                    data: reply.data.countUpgradesList
+                                }
+                            ]
+                        });
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

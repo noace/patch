@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpProductMapper">
+    
+    <resultMap type="UpProduct" id="UpProductResult">
+        <result property="productId"    column="product_id"    />
+        <result property="productName"    column="product_name"    />
+        <result property="productShortName"    column="product_short_name"    />
+        <result property="productCode"    column="product_code"    />
+        <result property="productRepository"    column="product_repository"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectUpProductVo">
+        select product_id, product_name, product_short_name, product_code, product_repository, create_by, create_time, update_by, update_time, del_flag, remark from up_product
+    </sql>
+
+    <select id="selectUpProductList" parameterType="UpProduct" resultMap="UpProductResult">
+        <include refid="selectUpProductVo"/>
+        <where>
+            <if test="productName != null  and productName != ''"> and product_name like concat('%', #{productName}, '%')</if>
+            <if test="remark != null  and remark != ''"> and remark like concat('%', #{remark}, '%') </if>
+            <if test="delFlag != null  and delFlag != ''"> and del_flag = #{delFlag}</if>
+        </where>
+    </select>
+	
+	<select id="selectUpProductListByName" parameterType="java.lang.String" resultMap="UpProductResult">
+		SELECT
+		up.*
+		FROM up_project_product upp
+		INNER JOIN up_product up ON upp.product_id = up.product_id
+		INNER JOIN up_project_person upn ON upp.project_product_id = upn.project_product_id
+		<where>
+			upn.del_flag != 'Y'
+			<if test="userId != null  and userId != ''"> and upn.user_id = #{userId}</if>
+		</where>
+	</select>
+    
+    <select id="selectUpProductById" parameterType="Integer" resultMap="UpProductResult">
+        <include refid="selectUpProductVo"/>
+        where product_id = #{productId}
+    </select>
+    
+    <insert id="insertUpProduct" parameterType="UpProduct" useGeneratedKeys="true" keyProperty="productId">
+        insert into up_product
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="productName != null and productName != ''">product_name,</if>
+            <if test="productShortName != null and productShortName != ''">product_short_name,</if>
+            <if test="productCode != null and productCode != ''">product_code,</if>
+            <if test="productRepository != null">product_repository,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="productName != null and productName != ''">#{productName},</if>
+            <if test="productShortName != null and productShortName != ''">#{productShortName},</if>
+            <if test="productCode != null and productCode != ''">#{productCode},</if>
+            <if test="productRepository != null">#{productRepository},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpProduct" parameterType="UpProduct">
+        update up_product
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="productName != null and productName != ''">product_name = #{productName},</if>
+            <if test="productShortName != null and productShortName != ''">product_short_name = #{productShortName},</if>
+            <if test="productCode != null and productCode != ''">product_code = #{productCode},</if>
+            <if test="productRepository != null">product_repository = #{productRepository},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where product_id = #{productId}
+    </update>
+
+    <delete id="deleteUpProductById" parameterType="Integer">
+        update up_product set del_flag = 'Y', update_time=sysdate() where product_id = #{productId}
+    </delete>
+
+    <delete id="deleteUpProductByIds" parameterType="String">
+        update up_product set del_flag = 'Y', update_time=sysdate() where product_id in
+        <foreach item="productId" collection="array" open="(" separator="," close=")">
+            #{productId}
+        </foreach>
+    </delete>
+
+</mapper>

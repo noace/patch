@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('项目授权码生成')" />
+    <th:block th:include="include :: datetimepicker-css" />
+</head>
+<style>
+    .droppable-active{background-color:#ffe!important}.tools a{cursor:pointer;font-size:80%}.form-body .col-md-6,.form-body .col-md-12{min-height:400px}.draggable{cursor:move}
+</style>
+<body class="gray-bg">
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-sm-5">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>授权信息</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="alert alert-info" style="font-size: 20;color: red">
+                        该功能用于实现：项目License授权码生成
+                    </div>
+                    <form role="form" class="form-horizontal m-t">
+
+                        <div class="form-group draggable">
+                            <label class="col-sm-3 control-label">绑定服务器MAC地址：
+                            </label>
+
+                            <div class="col-sm-9">
+                                <label class="toggle-switch switch-solid">
+                                    <input type="checkbox" id="bindMac">
+                                    <span></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group draggable">
+                            <label class="col-sm-3 control-label">服务器MAC地址：</label>
+                            <div class="col-sm-9">
+                                <textarea type="text" id="serverMac" class="form-control" placeholder="请输入服务器MAC地址"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group draggable">
+                            <label class="col-sm-3 control-label is-required">允许使用医院数量：</label>
+                            <div class="col-sm-9">
+                                <input type="text" id="allowedHospitalCount" class="form-control" placeholder="请输入允许使用医院的数量" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group draggable">
+                            <label class="col-sm-3 control-label is-required">授权到期时间：</label>
+
+                            <div class="col-sm-9">
+                                <div class="input-group date">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <input type="text" id="expireDate" class="form-control" value="2099-12-31" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group draggable">
+                            <div class="col-sm-12 col-sm-offset-3">
+                                <button type="button" class="btn btn-primary " onclick="getLicense()" shiro:hasPermission="upgrade:projectLicense:getLicense">生成授权码</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>数据密码加密</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="alert alert-info" style="font-size: 20;color: red">
+                        该功能用于实现：数据库明文密码的加密
+                    </div>
+                    <form role="form" class="form-horizontal m-t">
+                        <div class="form-group draggable">
+                            <label class="col-sm-3 control-label">数据库密码：</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="password" placeholder="请输入数据库密码">
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group draggable">
+                            <div class="col-sm-12 col-sm-offset-3">
+                                <button type="button" class="btn btn-primary '+encrypt+'" onclick="getEncryptPassword()" shiro:hasPermission="upgrade:projectLicense:getEncryptPassword">加密密码</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-7">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>生成的License授权码或数据库密文密码</h5>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="row form-body form-horizontal m-t">
+                        <textarea type="text" id="licenseCode" class="form-control" rows="25" readonly="true"></textarea>
+                    </div>
+                    <div align="right" style="margin-top: 10px">
+                        <button type="button" class="btn btn-warning" data-clipboard-text="testing"  onclick="copyLicense()">复制代码</button>
+                        <button type="button" class="btn btn-danger" data-clipboard-text="testing" onclick="clearLicense()">清空</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:src="@{/js/jquery-ui-1.10.4.min.js}"></script>
+<th:block th:include="include :: datetimepicker-js" />
+<script th:src="@{/ajax/libs/beautifyhtml/beautifyhtml.js}"></script>
+<script type="text/javascript">
+    var prefix = ctx + "upgrade/projectLicense";
+
+    $(document).ready(function(){setup_draggable();$("#n-columns").on("change",function(){var v=$(this).val();if(v==="1"){var $col=$(".form-body .col-md-12").toggle(true);$(".form-body .col-md-6 .draggable").each(function(i,el){$(this).remove().appendTo($col)});$(".form-body .col-md-6").toggle(false)}else{var $col=$(".form-body .col-md-6").toggle(true);$(".form-body .col-md-12 .draggable").each(function(i,el){$(this).remove().appendTo(i%2?$col[1]:$col[0])});$(".form-body .col-md-12").toggle(false)}});$("#copy-to-clipboard").on("click",function(){var $copy=$(".form-body").clone().appendTo(document.body);$copy.find(".tools, :hidden").remove();$.each(["draggable","droppable","sortable","dropped","ui-sortable","ui-draggable","ui-droppable","form-body"],function(i,c){$copy.find("."+c).removeClass(c).removeAttr("style")});var html=html_beautify($copy.html());$copy.remove();$modal=get_modal(html).modal("show");$modal.find(".btn").remove();$modal.find(".modal-title").html("复制HTML代码");$modal.find(":input:first").select().focus();return false})});var setup_draggable=function(){$(".draggable").draggable({appendTo:"body",helper:"clone"});$(".droppable").droppable({accept:".draggable",helper:"clone",hoverClass:"droppable-active",drop:function(event,ui){$(".empty-form").remove();var $orig=$(ui.draggable);if(!$(ui.draggable).hasClass("dropped")){var $el=$orig.clone().addClass("dropped").css({"position":"static","left":null,"right":null}).appendTo(this);if($el.find("label").hasClass("radio-box")){$el=$el.html('<label class="col-sm-3 control-label">单选框：</label>'+'<div class="col-sm-9">'+'<label class="radio-box"><input type="radio" checked="" value="option1" id="optionsRadios1" name="optionsRadios">选项1</label>'+'<label class="radio-box"><input type="radio" value="option2" id="optionsRadios2" name="optionsRadios">选项2</label>'+"</div>")}else{if($el.find("label").hasClass("check-box")){$el=$el.html('<label class="col-sm-3 control-label">复选框：</label>'+'<div class="col-sm-9">'+'<label class="check-box">'+'<input type="checkbox" value="option1" id="inlineCheckbox1">选项1</label>'+'<label class="check-box">'+'<input type="checkbox" value="option2" id="inlineCheckbox2">选项2</label>'+'<label class="check-box">'+'<input type="checkbox" value="option3" id="inlineCheckbox3">选项3</label>'+"</div>")}}var id=$orig.find(":input").attr("id");if(id){id=id.split("-").slice(0,-1).join("-")+"-"+(parseInt(id.split("-").slice(-1)[0])+1);$orig.find(":input").attr("id",id);$orig.find("label").attr("for",id)}$('<p class="tools col-sm-12 col-sm-offset-3">						<a class="edit-link">编辑HTML<a> | 						<a class="remove-link">移除</a></p>').appendTo($el)}else{if($(this)[0]!=$orig.parent()[0]){var $el=$orig.clone().css({"position":"static","left":null,"right":null}).appendTo(this);$orig.remove()}}}}).sortable()};var get_modal=function(content){var modal=$('<div class="modal" style="overflow: auto;" tabindex="-1">	<div class="modal-dialog"><div class="modal-content"><div class="modal-header"><a type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</a><h4 class="modal-title">编辑HTML</h4></div><div class="modal-body ui-front">	<textarea class="form-control textarea-show-src"  style="min-height: 200px; margin-bottom: 10px;font-family: Monaco, Fixed"></textarea><button class="btn btn-success">更新HTML</button></div></div></div></div>').appendTo(document.body);var doms=document.getElementsByClassName("textarea-show-src");for(var i=0;i<doms.length;i++){doms.item(i).innerHTML=content}return modal};$(document).on("click",".edit-link",function(ev){var $el=$(this).parent().parent();var $el_copy=$el.clone();var $edit_btn=$el_copy.find(".edit-link").parent().remove();var $modal=get_modal(html_beautify($el_copy.html())).modal("show");$modal.find(":input:first").focus();$modal.find(".btn-success").click(function(ev2){var html=$modal.find("textarea").val();if(!html){$el.remove()}else{$el.html(html);$edit_btn.appendTo($el)}$modal.modal("hide");return false})});$(document).on("click",".remove-link",function(ev){$(this).parent().parent().remove()});$(".input-group.date").datetimepicker({format:"yyyy-mm-dd",minView:"month",autoclose:true});
+
+    //加密数据库密码
+
+
+    function getEncryptPassword() {
+        var password = $("#password").val();
+
+        if(password == null || password == "") {
+            $.modal.msgWarning("密码为空！");
+            return;
+        }
+
+        var url = prefix + "/getEncryptPassword";
+        $.ajax({
+            url:url,
+            type:"post",
+            data: "password=" + password,
+            success:function(reply){
+                if (reply.code == 0) {
+                    $.modal.alert("加密成功！");
+                    $("#licenseCode").val(reply.data.encryptPassword);
+                } else {
+                    $.modal.msgWarning("加密失败！");
+                }
+            }
+        });
+    }
+
+    //生成License
+    function getLicense() {
+        var bindMac = $("input[id='bindMac']").is(':checked') == true ? 'Y' : 'N';
+        var serverMac = $("#serverMac").val();
+        var allowedHospitalCount = $("#allowedHospitalCount").val();
+        var expireDate = $("#expireDate").val();
+
+        if(bindMac == 'Y' && serverMac == "") {
+            $.modal.msgWarning("服务器mac地址为空！");
+            return;
+        }
+
+        if(allowedHospitalCount == null || allowedHospitalCount == "") {
+            $.modal.msgWarning("允许使用医院的数量为空！");
+            return;
+        }
+
+        if(expireDate == null || expireDate == "") {
+            $.modal.msgWarning("到期时间为空！");
+            return;
+        }
+
+        var url = prefix + "/getLicense";
+        $.ajax({
+            url:url,
+            type:"post",
+            data: "bindMac=" + bindMac + "&serverMac=" + serverMac + "&allowedHospitalCount=" + allowedHospitalCount+ "&expireDate=" + expireDate,
+            success:function(reply){
+                debugger;
+                if (reply.code == 0) {
+                    $.modal.alert("授权码生成成功！");
+                    $("#licenseCode").val(reply.data.license);
+                } else {
+                    $.modal.msgWarning("授权码生成生成失败！");
+                }
+            }
+        });
+    }
+    
+    function copyLicense() {
+        var license = $("#licenseCode").val();
+        if(license == null || license == "") {
+            $.modal.msgWarning("license为空！");
+            return;
+        }
+        $("#licenseCode").select() //选中文本
+        document.execCommand("Copy");
+        $.modal.alert("复制成功！");
+    }
+    
+    function clearLicense() {
+        $("#licenseCode").val("");
+    }
+</script>
+</body>
+</html>

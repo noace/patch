@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpBuildLogMapper">
+    
+    <resultMap type="UpBuildLog" id="UpBuildLogResult">
+        <result property="buildId"    column="build_id"    />
+        <result property="patchId"    column="patch_id"    />
+        <result property="processId"    column="process_id"    />
+        <result property="buildLog"    column="build_log"    />
+        <result property="buildType"    column="build_type"    />
+        <result property="buildWorker"    column="build_worker"    />
+        <result property="buildTime"    column="build_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectUpBuildLogVo">
+        select build_id, patch_id, process_id, build_log, build_type, build_worker, build_time, del_flag, remark from up_build_log
+    </sql>
+
+    <select id="selectUpBuildLogList" parameterType="UpBuildLog" resultMap="UpBuildLogResult">
+        <include refid="selectUpBuildLogVo"/>
+        <where>
+            <if test="buildLog != null  and buildLog != ''"> and build_log = #{buildLog}</if>
+            <if test="buildWorker != null  and buildWorker != ''"> and build_worker = #{buildWorker}</if>
+            <if test="buildTime != null "> and build_time = #{buildTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectUpBuildLogById" parameterType="Long" resultMap="UpBuildLogResult">
+        <include refid="selectUpBuildLogVo"/>
+        where build_id = #{buildId}
+    </select>
+    
+    <insert id="insertUpBuildLog" parameterType="UpBuildLog" useGeneratedKeys="true" keyProperty="buildId">
+        insert into up_build_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="patchId != null and patchId != ''">patch_id,</if>
+            <if test="processId != null and processId != ''">process_id,</if>
+            <if test="buildLog != null and buildLog != ''">build_log,</if>
+            <if test="buildType != null and buildType != ''">build_type,</if>
+            <if test="buildWorker != null and buildWorker != ''">build_worker,</if>
+            <if test="buildTime != null">build_time,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="patchId != null and patchId != ''">#{patchId},</if>
+            <if test="processId != null and processId != ''">#{processId},</if>
+            <if test="buildLog != null and buildLog != ''">#{buildLog},</if>
+            <if test="buildType != null and buildType != ''">#{buildType},</if>
+            <if test="buildWorker != null and buildWorker != ''">#{buildWorker},</if>
+            <if test="buildTime != null">#{buildTime},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpBuildLog" parameterType="UpBuildLog">
+        update up_build_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="patchId != null and patchId != ''">patch_id = #{patchId},</if>
+            <if test="processId != null and processId != ''">process_id = #{processId},</if>
+            <if test="buildLog != null and buildLog != ''">build_log = #{buildLog},</if>
+            <if test="buildType != null and buildType != ''">build_type = #{buildType},</if>
+            <if test="buildWorker != null and buildWorker != ''">build_worker = #{buildWorker},</if>
+            <if test="buildTime != null">build_time = #{buildTime},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where build_id = #{buildId}
+    </update>
+
+    <delete id="deleteUpBuildLogById" parameterType="Long">
+        update up_build_log set del_flag = 'Y', update_time=sysdate() where build_id = #{buildId}
+    </delete>
+
+    <delete id="deleteUpBuildLogByIds" parameterType="Long">
+        update up_build_log set del_flag = 'Y' where build_id in
+        <foreach item="buildId" collection="array" open="(" separator="," close=")">
+            #{buildId}
+        </foreach>
+    </delete>
+	
+	<select id="getBuildLogsByPatchId" parameterType="Long" resultMap="UpBuildLogResult">
+		<include refid="selectUpBuildLogVo"/>
+		where patch_id = #{patchId}
+		and del_flag = 'N'
+	</select>
+	
+	<delete id="deleteLogByIds" parameterType="Long">
+		delete from
+			up_build_log
+		where
+		    build_id in
+		<foreach collection="buildIds" open="(" separator="," close=")" item="buildId">
+			#{buildId}
+		</foreach>
+	</delete>
+</mapper>

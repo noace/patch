@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpCommandMapper">
+    
+    <resultMap type="UpCommand" id="UpCommandResult">
+        <result property="commandId"    column="command_id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="productId"    column="product_id"    />
+        <result property="patchId"    column="patch_id"    />
+        <result property="commandType"    column="command_type"    />
+        <result property="commandInfo"    column="command_info"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectUpCommandVo">
+        select command_id, project_id, product_id, patch_id, command_type, command_info, create_by, create_time, update_by, update_time, del_flag, remark from up_command
+    </sql>
+
+    <select id="selectUpCommandList" parameterType="UpCommand" resultMap="UpCommandResult">
+        <include refid="selectUpCommandVo"/>
+        <where>
+            <if test="commandId != null "> and command_id = #{commandId}</if>
+            <if test="projectId != null "> and project_id = #{projectId}</if>
+            <if test="productId != null "> and product_id = #{productId}</if>
+            <if test="patchId != null "> and patch_id = #{patchId}</if>
+            <if test="commandType != null  and commandType != ''"> and command_type = #{commandType}</if>
+            <if test="commandInfo != null  and commandInfo != ''"> and command_info = #{commandInfo}</if>
+            <if test="createBy != null  and createBy != ''"> and create_by = #{createBy}</if>
+            <if test="createTime != null "> and create_time = #{createTime}</if>
+            <if test="updateBy != null  and updateBy != ''"> and update_by = #{updateBy}</if>
+            <if test="updateTime != null "> and update_time = #{updateTime}</if>
+            <if test="delFlag != null  and delFlag != ''"> and del_flag = #{delFlag}</if>
+            <if test="remark != null  and remark != ''"> and remark = #{remark}</if>
+        </where>
+    </select>
+    
+    <select id="selectUpCommandById" parameterType="Long" resultMap="UpCommandResult">
+        <include refid="selectUpCommandVo"/>
+        where command_id = #{commandId}
+    </select>
+
+    <select id="selectUpCommandOld" resultMap="UpCommandResult">
+        select
+            uc.command_id,
+            uc.project_id,
+            uc.product_id,
+            uc.patch_id,
+            uc.command_type,
+            uc.command_info,
+            uc.create_by,
+            uc.create_time,
+            uc.update_by,
+            uc.update_time,
+            uc.del_flag,
+            uc.remark
+        from
+            up_command uc
+        inner join up_project_product pp
+        on uc.project_id = pp.project_id
+        and uc.product_id = pp.product_id
+        and pp.del_flag = 'N'
+        where uc.del_flag != 'Y'
+        order by pp.patch_rank desc,uc.create_time
+        limit 1
+    </select>
+
+    <insert id="insertUpCommand" parameterType="UpCommand" useGeneratedKeys="true" keyProperty="commandId">
+        insert into up_command
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">project_id,</if>
+            <if test="productId != null">product_id,</if>
+            <if test="patchId != null">patch_id,</if>
+            <if test="commandType != null and commandType != ''">command_type,</if>
+            <if test="commandInfo != null and commandInfo != ''">command_info,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null and updateBy != ''">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">#{projectId},</if>
+            <if test="productId != null">#{productId},</if>
+            <if test="patchId != null">#{patchId},</if>
+            <if test="commandType != null and commandType != ''">#{commandType},</if>
+            <if test="commandInfo != null and commandInfo != ''">#{commandInfo},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpCommand" parameterType="UpCommand">
+        update up_command
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="productId != null">product_id = #{productId},</if>
+            <if test="patchId != null">patch_id = #{patchId},</if>
+            <if test="commandType != null and commandType != ''">command_type = #{commandType},</if>
+            <if test="commandInfo != null and commandInfo != ''">command_info = #{commandInfo},</if>
+            <if test="createBy != null and createBy != ''">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where patch_id = #{patchId}
+    </update>
+
+    <delete id="deleteUpCommandById" parameterType="Long">
+        update up_command set del_flag = 'Y', update_time=sysdate() where command_id = #{commandId}
+    </delete>
+
+    <delete id="deleteUpCommandByIds" parameterType="String">
+        update up_command set del_flag = 'Y', update_time=sysdate() where command_id in
+        <foreach item="commandId" collection="array" open="(" separator="," close=")">
+            #{commandId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteUpCommandByPatchIdsAndLoginName" parameterType="String">
+        update up_command set del_flag = 'Y', update_time=sysdate(), update_by = #{loginName} where patch_id in
+        <foreach item="patchId" collection="patchIds" open="(" separator="," close=")">
+            #{patchId}
+        </foreach>
+    </delete>
+</mapper>

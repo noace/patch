@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpPatchSqlMapper">
+    
+    <resultMap type="com.kyee.upgrade.domain.UpPatchSql" id="UpPatchSqlResult">
+        <result property="id"    column="id"    />
+        <result property="patchId"    column="patch_id"    />
+        <result property="sqlName"    column="sql_name"    />
+        <result property="sqlPath"    column="sql_path"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <resultMap type="com.kyee.upgrade.domain.UpPatchSql" id="SqlResult">
+        <result property="id"    column="id"    />
+        <result property="patchId"    column="patch_id"    />
+        <result property="productId"    column="product_id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="patchFileName"    column="patch_file_name"    />
+        <result property="sqlName"    column="sql_name"    />
+        <result property="sqlPath"    column="sql_path"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectUpPatchSqlVo">
+        select id, patch_id, sql_name, sql_path, create_by, create_time, update_by, update_time, remark from up_patch_sql
+    </sql>
+
+    <sql id="selectSqlVo">
+        select
+            ups.id,
+            ups.patch_id,
+            up.product_id,
+            up.project_id,
+            up.patch_file_name,
+            ups.sql_name,
+            ups.sql_path,
+            ups.create_by,
+            ups.create_time,
+            ups.update_by,
+            ups.update_time,
+            ups.remark
+        from up_patch_sql ups inner join up_patch up
+        on ups.patch_id = up.patch_id
+    </sql>
+
+    <select id="selectUpPatchSqlList" parameterType="com.kyee.upgrade.domain.UpPatchSql" resultMap="SqlResult">
+        <include refid="selectSqlVo"/>
+        <where>
+            <if test="patchFileName != null and patchFileName!= ''"> and up.patch_file_name = #{patchFileName}</if>
+            <if test="sqlName != null  and sqlName != ''"> and ups.sql_name like concat('%', #{sqlName}, '%')</if>
+            <if test="productId != null and productId != ''"> and up.product_id = #{productId}</if>
+            <if test="projectId != null and projectId != ''"> and up.project_id = #{projectId}</if>
+            <if test="sqlPath != null  and sqlPath != ''"> and ups.sql_path = #{sqlPath}</if>
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(ups.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(ups.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+            and up.del_flag != 'Y'
+        </where>
+        order by ups.create_time desc
+    </select>
+    
+    <select id="selectUpPatchSqlById" parameterType="Long" resultMap="UpPatchSqlResult">
+        <include refid="selectUpPatchSqlVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertUpPatchSql" parameterType="com.kyee.upgrade.domain.UpPatchSql" useGeneratedKeys="true" keyProperty="id">
+        insert into up_patch_sql
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="patchId != null">patch_id,</if>
+            <if test="sqlName != null and sqlName != ''">sql_name,</if>
+            <if test="sqlPath != null and sqlPath != ''">sql_path,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="patchId != null">#{patchId},</if>
+            <if test="sqlName != null and sqlName != ''">#{sqlName},</if>
+            <if test="sqlPath != null and sqlPath != ''">#{sqlPath},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpPatchSql" parameterType="com.kyee.upgrade.domain.UpPatchSql">
+        update up_patch_sql
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="patchId != null">patch_id = #{patchId},</if>
+            <if test="sqlName != null and sqlName != ''">sql_name = #{sqlName},</if>
+            <if test="sqlPath != null and sqlPath != ''">sql_path = #{sqlPath},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteUpPatchSqlById" parameterType="Long">
+        delete from up_patch_sql where id = #{id}
+    </delete>
+
+    <delete id="deleteUpPatchSqlByIds" parameterType="String">
+        delete from up_patch_sql where patch_id in
+        <foreach item="patchId" collection="patchIds" open="(" separator="," close=")">
+            #{patchId}
+        </foreach>
+    </delete>
+
+    <select id="batchSelectSqlList" resultMap="UpPatchSqlResult">
+        select * from  up_patch_sql
+        where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="selectUpPatchSqlByPatchId" resultMap="UpPatchSqlResult">
+        <include refid="selectUpPatchSqlVo"/>
+        where 1=1
+        and sql_name = #{fileName}
+        and patch_id = #{patchId}
+    </select>
+
+</mapper>

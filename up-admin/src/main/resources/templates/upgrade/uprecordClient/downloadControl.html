@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('升级文件列表')" />
+    <th:block th:include="include :: select2-css" />
+    <th:block th:include="include :: bootstrap-select-css" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('upgrade:uprecord:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('upgrade:uprecord:remove')}]];
+        var upStatusDatas = [[${@dict.getType('up_upgrade_status')}]];
+        var bugfixFlagDatas = [[${@dict.getType('sys_yes_no')}]];
+        var prefix = ctx + "upgrade/uprecordClient";
+
+        $(function() {
+            var options = {
+                url: prefix + "/getPatchFileList",
+                downloadPatchFile: prefix + "/downloadPatchFile",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'productName',
+                    title: '产品'
+                },
+                {
+                    field: 'patchFileName',
+                    title: '补丁文件名'
+                },
+                {
+                    field: 'sqlFlag',
+                    title: '含SQL脚本',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs" href="javascript:void(0)" onclick="downloadPatchFile(\'' + row.patchFileUrl + '\')"><i class="fa fa-download"></i>下载</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+
+        // 下载升级文件
+        function downloadPatchFile(patchFileUrl) {
+            debugger;
+            table.set();
+            var dataParam = { "patchFileUrl": encodeURI(patchFileUrl) };
+            $.get(table.options.downloadPatchFile, dataParam, function(result) {
+                if (result.code == web_status.SUCCESS) {
+                    $.modal.alertSuccess("下载成功！");
+                } else if (result.code == web_status.WARNING) {
+                    $.modal.alertWarning(result.msg);
+                } else {
+                    $.modal.alertError(result.msg);
+                }
+            });
+        }
+
+    </script>
+     <th:block th:include="include :: select2-js" />
+     <th:block th:include="include :: bootstrap-select-js" />
+</body>
+</html>

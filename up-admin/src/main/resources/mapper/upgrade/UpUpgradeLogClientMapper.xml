@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpUpgradeLogClientMapper">
+    
+    <resultMap type="UpUpgradeLogClient" id="UpUpgradeLogClientResult">
+        <result property="logId"    column="log_id"    />
+        <result property="processId"    column="process_id"    />
+        <result property="serverId"    column="server_id"    />
+        <result property="patchId"    column="patch_id"    />
+        <result property="upWorker"    column="up_worker"    />
+        <result property="upTime"    column="up_time"    />
+        <result property="logContent"    column="log_content"    />
+        <result property="preDbVersion"    column="pre_db_version"    />
+        <result property="preServerVersion"    column="pre_server_version"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectUpUpgradeLogClientVo">
+        select log_id, process_id, server_id, patch_id, up_worker, up_time, log_content, pre_db_version, pre_server_version, create_by, create_time, update_by, update_time, del_flag, remark from up_upgrade_log_client
+    </sql>
+
+    <select id="selectUpUpgradeLogClientList" parameterType="UpUpgradeLogClient" resultMap="UpUpgradeLogClientResult">
+        <include refid="selectUpUpgradeLogClientVo"/>
+        <where>
+	        <if test="processId != null "> and process_id = #{processId}</if>
+            <if test="serverId != null "> and server_id = #{serverId}</if>
+            <if test="patchId != null "> and patch_id = #{patchId}</if>
+            <if test="upWorker != null  and upWorker != ''"> and up_worker = #{upWorker}</if>
+            <if test="upTime != null "> and up_time = #{upTime}</if>
+            <if test="logContent != null  and logContent != ''"> and log_content = #{logContent}</if>
+            <if test="preDbVersion != null  and preDbVersion != ''"> and pre_db_version = #{preDbVersion}</if>
+            <if test="preServerVersion != null  and preServerVersion != ''"> and pre_server_version = #{preServerVersion}</if>
+        </where>
+    </select>
+    
+    <select id="selectUpUpgradeLogClientById" parameterType="Long" resultMap="UpUpgradeLogClientResult">
+        <include refid="selectUpUpgradeLogClientVo"/>
+        where log_id = #{logId}
+    </select>
+        
+    <insert id="insertUpUpgradeLogClient" parameterType="UpUpgradeLogClient" useGeneratedKeys="true" keyProperty="logId">
+        insert into up_upgrade_log_client
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="processId != null">process_id,</if>
+            <if test="serverId != null">server_id,</if>
+            <if test="patchId != null">patch_id,</if>
+            <if test="upWorker != null">up_worker,</if>
+            <if test="upTime != null">up_time,</if>
+            <if test="logContent != null">log_content,</if>
+            <if test="preDbVersion != null">pre_db_version,</if>
+            <if test="preServerVersion != null">pre_server_version,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="processId != null">#{processId},</if>
+            <if test="serverId != null">#{serverId},</if>
+            <if test="patchId != null">#{patchId},</if>
+            <if test="upWorker != null">#{upWorker},</if>
+            <if test="upTime != null">#{upTime},</if>
+            <if test="logContent != null">#{logContent},</if>
+            <if test="preDbVersion != null">#{preDbVersion},</if>
+            <if test="preServerVersion != null">#{preServerVersion},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpUpgradeLogClient" parameterType="UpUpgradeLogClient">
+        update up_upgrade_log_client
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="processId != null">process_id = #{processId},</if>
+            <if test="serverId != null">server_id = #{serverId},</if>
+            <if test="patchId != null">patch_id = #{patchId},</if>
+            <if test="upWorker != null">up_worker = #{upWorker},</if>
+            <if test="upTime != null">up_time = #{upTime},</if>
+            <if test="logContent != null">log_content = #{logContent},</if>
+            <if test="preDbVersion != null">pre_db_version = #{preDbVersion},</if>
+            <if test="preServerVersion != null">pre_server_version = #{preServerVersion},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where log_id = #{logId}
+    </update>
+
+    <delete id="deleteUpUpgradeLogClientById" parameterType="Long">
+        update up_upgrade_log_client set del_flag = 'Y', update_time=sysdate() where log_id = #{logId}
+    </delete>
+
+    <delete id="deleteUpUpgradeLogClientByIds" parameterType="String">
+        update up_upgrade_log_client set del_flag = 'Y', update_time=sysdate() where log_id in
+        <foreach item="logId" collection="array" open="(" separator="," close=")">
+            #{logId}
+        </foreach>
+    </delete>
+
+</mapper>

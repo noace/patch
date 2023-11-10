@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('项目配置列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <input name="delFlag" value="N" type="hidden">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>项目：</label>
+                                <select name="projectId" th:with="plist=${@upHelper.getProjectList()}">
+                                    <option value="">所有</option>
+                                    <option th:each="project : ${plist}" th:text="${project.projectName}" th:value="${project.projectId}"></option>
+                                </select>
+                            </li>
+                            <li>
+                                <label>产品：</label>
+                                <select name="productId" th:with="plist=${@upHelper.getProductList()}">
+                                    <option value="">所有</option>
+                                    <option th:each="product : ${plist}" th:text="${product.productName}" th:value="${product.productId}"></option>
+                                </select>
+                            </li>
+                            <li>
+                                <label>不打包的配置文件名：</label>
+                                <input type="text" name="configFileName"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="upgrade:projectConfigFile:add">
+                    <i class="fa fa-plus"></i> 添加
+                </a>
+<!--                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="upgrade:projectConfigFile:edit">
+                    <i class="fa fa-edit"></i> 修改
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="upgrade:projectProduct:remove">
+                    <i class="fa fa-remove"></i> 删除
+                </a>-->
+                <!--<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="upgrade:projectProduct:export">-->
+                    <!--<i class="fa fa-download"></i> 导出-->
+                <!--</a>-->
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('upgrade:projectConfigFile:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('upgrade:projectConfigFile:remove')}]];
+        var prefix = ctx + "upgrade/projectConfigFile";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                //exportUrl: prefix + "/export",
+                modalName: "配置文件",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'projectProductId',
+                    title: '项目产品ID',
+                    visible: false
+                },
+                {
+                    field: 'projectName',
+                    title: '项目名称',
+                    visible: false
+                },
+                {
+                    field: 'productName',
+                    title: '产品名称'
+                },
+                {
+                    field: 'configFileName',
+                    title: '不打包的配置文件名'
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.projectProductId + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.projectProductId + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpUpgradeRecordMapper">
+    
+    <resultMap type="UpUpgradeRecord" id="UpUpgradeRecordResult">
+        <result property="upgradeId"    column="upgrade_id"    />
+        <result property="serverId"    column="server_id"    />
+        <result property="patchId"    column="patch_id"    />
+        <result property="upStatus"    column="up_status"    />
+        <result property="upTimes"    column="up_times"    />
+        <result property="lastUpWorker"    column="last_up_worker"    />
+        <result property="lastUpTime"    column="last_up_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectUpUpgradeRecordVo">
+        select upgrade_id, server_id, patch_id, up_status, up_times, last_up_worker, last_up_time, create_by, create_time, update_by, update_time, del_flag, remark from up_upgrade_record
+    </sql>
+
+    <select id="selectUpUpgradeRecordList" parameterType="UpUpgradeRecord" resultMap="UpUpgradeRecordResult">
+        <include refid="selectUpUpgradeRecordVo"/>
+        <where>  
+            <if test="serverId != null "> and server_id = #{serverId}</if>
+            <if test="patchId != null "> and patch_id = #{patchId}</if>
+            <if test="upStatus != null  and upStatus != ''"> and up_status = #{upStatus}</if>
+            <if test="lastUpWorker != null  and lastUpWorker != ''"> and last_up_worker = #{lastUpWorker}</if>
+        </where>
+    </select>
+    
+    <select id="selectUpUpgradeRecordById" parameterType="Long" resultMap="UpUpgradeRecordResult">
+        <include refid="selectUpUpgradeRecordVo"/>
+        where upgrade_id = #{upgradeId}
+    </select>
+        
+    <insert id="insertUpUpgradeRecord" parameterType="UpUpgradeRecord" useGeneratedKeys="true" keyProperty="upgradeId">
+        insert into up_upgrade_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="serverId != null">server_id,</if>
+            <if test="patchId != null">patch_id,</if>
+            <if test="upStatus != null">up_status,</if>
+            <if test="upTimes != null">up_times,</if>
+            <if test="lastUpWorker != null">last_up_worker,</if>
+            <if test="lastUpTime != null">last_up_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="serverId != null">#{serverId},</if>
+            <if test="patchId != null">#{patchId},</if>
+            <if test="upStatus != null">#{upStatus},</if>
+            <if test="upTimes != null">#{upTimes},</if>
+            <if test="lastUpWorker != null">#{lastUpWorker},</if>
+            <if test="lastUpTime != null">#{lastUpTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpUpgradeRecord" parameterType="UpUpgradeRecord">
+        update up_upgrade_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="serverId != null">server_id = #{serverId},</if>
+            <if test="patchId != null">patch_id = #{patchId},</if>
+            <if test="upStatus != null">up_status = #{upStatus},</if>
+            <if test="upTimes != null">up_times = #{upTimes},</if>
+            <if test="lastUpWorker != null">last_up_worker = #{lastUpWorker},</if>
+            <if test="lastUpTime != null">last_up_time = #{lastUpTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where upgrade_id = #{upgradeId}
+    </update>
+
+    <delete id="deleteUpUpgradeRecordById" parameterType="Long">
+        update up_upgrade_record set del_flag = 'Y', update_time=sysdate() where upgrade_id = #{upgradeId}
+    </delete>
+
+    <delete id="deleteUpUpgradeRecordByIds" parameterType="String">
+        update up_upgrade_record set del_flag = 'Y', update_time=sysdate() where upgrade_id in
+        <foreach item="upgradeId" collection="array" open="(" separator="," close=")">
+            #{upgradeId}
+        </foreach>
+    </delete>
+
+</mapper>

@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('云端发布补丁列表')"/>
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <input name="delFlag" value="N" type="hidden">
+                <div class="select-list">
+                    <ul id="projectProduct">
+                        <li>
+                            <label>产品：</label>
+                            <select name="productId" class="type">
+                            </select>
+                        </li>
+                        <li>
+                            <label>项目：</label>
+                            <select name="projectId" class="router">
+                            </select>
+                        </li>
+                        <li>
+                            <label>加急包：</label>
+                            <select name="expedited">
+                                <option value="">所有</option>
+                                <option value="Y">是</option>
+                                <option value="N">否</option>
+                            </select>
+                        </li>
+                        <li>
+                            <label>任务号：</label>
+                            <input type="text" name="jiraNo"/>
+                        </li>
+                        <li>
+                            <label>任务名：</label>
+                            <input type="text" name="topic"/>
+                        </li>
+                        <li>
+                            <label>需求号：</label>
+                            <input type="text" name="demandNo"/>
+                        </li>
+                        <li>
+                            <label>需求名：</label>
+                            <input type="text" name="demandName"/>
+                        </li>
+                        <li>
+                            <label>是否合包：</label>
+                            <select name="mergePackageFlag" th:with="type=${@dict.getType('sys_yes_no')}">
+                                <option value="">所有</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <label>是否拉取：</label>
+                            <select name="pulledFlag">
+                                <option value="N" selected>否</option>
+                                <option value="Y">是</option>
+                                <!--<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>-->
+                            </select>
+                        </li>
+                        <!--TODO branch-->
+                        <!--<li>-->
+                            <!--<label>包类型：</label>-->
+                            <!--<select id="patchType" name="patchType" th:with="type=${@dict.getType('up_patch_type')}" onchange="changeTable()">-->
+                                <!--<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>-->
+                            <!--</select>-->
+                        <!--</li>-->
+                        <li>
+                            <label>责任人：</label>
+                            <input type="text" name="updateBy"/>
+                        </li>
+                        <li class="select-time">
+                            <label>编译时间： </label>
+                            <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                            <span>-</span>
+                            <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                        </li>
+                        <li>
+                            <label>任务类型：</label>
+                            <select name="taskType" th:with="type=${@dict.getType('task_type')}">
+                                <option value="">所有</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <label>补丁名称：</label>
+                            <input type="text" name="patchFileName"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="searchPatch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-info multiple disabled" onclick="mergeDownlod()" id="mergeId">
+                <i class="fa fa-exchange"></i> 合并包
+            </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<th:block th:include="include :: jquery-cxselect-js" />
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('upgrade:uprecord:edit')}]];
+    var patchStatusDatas = [[${@dict.getType('up_patch_status')}]];
+    var bugfixFlagDatas = [[${@dict.getType('sys_yes_no')}]];
+    var mergeFlagDatas = [[${@dict.getType('sys_yes_no')}]];
+    var patchTypeDatas = [[${@dict.getType('up_patch_type')}]];
+    var taskTypeDatas = [[${@dict.getType('task_type')}]];
+    var prefix = ctx + "upgrade/patchClient";
+    var options_release;
+    $(function () {
+        options_release = {
+            url: prefix + "/getPatchFileList",
+            downloadPatchFile: prefix + "/downloadPatchFile",
+            mergeDownlodUrl: prefix + "/mergeDownlod",
+            cancleMergeUrl: prefix + "/cancleMerge",
+            jiraListUrl: prefix+ "/jiraList/"+false+"/{patchId}",
+            rePatchUrl: prefix+ "/rePatch",
+            onClickCell: onClickCell,
+            pagination: false,
+            columns: [
+                {
+                    checkbox: true
+                },
+                {
+                    field: 'patchId',
+                    title: '补丁ID',
+                    visible: false
+                },
+                {
+                    field: 'productName',
+                    title: '产品'
+                },
+                {
+                    field: 'projectName',
+                    title: '项目'
+                },
+                {
+                    field: 'expedited',
+                    title: '加急包',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(mergeFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'mergePackageFlag',
+                    title: '是否合包',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(mergeFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'jiraNo',
+                    title: '任务号'
+                },
+                {
+                    field: 'topic',
+                    title: '任务名',
+                    width: '250px',
+                    visible: false
+                },
+                {
+                    field: 'demandNo',
+                    title: '需求号',
+
+                },
+                {
+                    field: 'taskType',
+                    title: '任务类型',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(taskTypeDatas, value);
+                    }
+                },
+                {
+                    field: 'demandName',
+                    title: '需求名',
+                    visible: false
+                },
+                {
+                    field: 'patchStatus',
+                    title: '补丁状态',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(patchStatusDatas, value);
+                    }
+                },
+                {
+                    field: 'patchFileUrl',
+                    title: '补丁文件路径',
+                    visible: false
+                },
+                {
+                    field: 'buildTime',
+                    title: '编译时间'
+                },
+                {
+                    field: 'updateBy',
+                    title: '责任人'
+                },
+                {
+                    field: 'sqlFlag',
+                    title: '含SQL',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'configFlag',
+                    title: '修改配置',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'pulledFlag',
+                    title: '是否拉取',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'bugfixFlag',
+                    title: '修复任务',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(mergeFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'bugFlag',
+                    title: '是否BUG',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(mergeFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'patchFileName',
+                    title: '补丁名称',
+                    formatter: function (value, row, index) {
+                        return $.table.tooltip(value, 30, "open");
+                    },
+                    visible: false
+                },
+                {
+                    field: 'patchType',
+                    title: '补丁包类型',
+                    sortable: true,
+                    visible: false,
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(patchTypeDatas, value);
+                    }
+                },
+                {
+                    field: 'codeList',
+                    title: '代码列表',
+                    formatter: function (value, row, index) {
+                        return $.table.tooltip(value, 30, "open");
+                    },
+                    visible: false
+                },
+                {
+                    field: 'realCodeList',
+                    title: '编译路径',
+                    formatter: function(value, row, index) {
+                        return $.table.tooltip(value, 30, "open");
+                    },
+                    visible: true
+                },
+            ]
+        };
+
+        var options = {
+            url: prefix + "/getPatchFileList",
+            downloadPatchFile: prefix + "/downloadPatchFile",
+            mergeDownlodUrl: prefix + "/mergeDownlod",
+            cancleMergeUrl: prefix + "/cancleMerge",
+            jiraListUrl: prefix+ "/jiraList/"+false+"/{patchId}",
+            rePatchUrl: prefix+ "/rePatch",
+            onClickCell: onClickCell,
+            pagination: false,
+            columns: [
+                {
+                    checkbox: true
+                },
+                {
+                    field: 'patchId',
+                    title: '补丁ID',
+                    visible: false
+                },
+                {
+                    field: 'productName',
+                    title: '产品'
+                },
+                {
+                    field: 'projectName',
+                    title: '项目'
+                },
+                {
+                    field: 'expedited',
+                    title: '加急包',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(mergeFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'mergePackageFlag',
+                    title: '是否合包',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(mergeFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'jiraNo',
+                    title: '任务号'
+                },
+                {
+                    field: 'topic',
+                    title: '任务名',
+                    width: '250px',
+                    visible: false
+                },
+                {
+                    field: 'demandNo',
+                    title: '需求号',
+
+                },
+                {
+                    field: 'taskType',
+                    title: '任务类型',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(taskTypeDatas, value);
+                    }
+                },
+                {
+                    field: 'demandName',
+                    title: '需求名',
+                    visible: false
+                },
+                {
+                    field: 'patchStatus',
+                    title: '补丁状态',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(patchStatusDatas, value);
+                    }
+                },
+                {
+                    field: 'patchFileUrl',
+                    title: '补丁文件路径',
+                    visible: false
+                },
+                {
+                    field: 'buildTime',
+                    title: '编译时间'
+                },
+                {
+                    field: 'updateBy',
+                    title: '责任人'
+                },
+                {
+                    field: 'sqlFlag',
+                    title: '含SQL',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'configFlag',
+                    title: '修改配置',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'pulledFlag',
+                    title: '是否拉取',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'bugfixFlag',
+                    title: '修复任务',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(mergeFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'bugFlag',
+                    title: '是否BUG',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(mergeFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'patchFileName',
+                    title: '补丁名称',
+                    formatter: function (value, row, index) {
+                        return $.table.tooltip(value, 30, "open");
+                    },
+                    visible: false
+                },
+                {
+                    field: 'patchType',
+                    title: '补丁包类型',
+                    sortable: true,
+                    visible: false,
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(patchTypeDatas, value);
+                    }
+                },
+                {
+                    field: 'codeList',
+                    title: '代码列表',
+                    formatter: function (value, row, index) {
+                        return $.table.tooltip(value, 30, "open");
+                    },
+                    visible: false
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    width: '150px',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        if (row.patchStatus == 15) {
+                            if (row.mergePackageFlag == 'Y') {
+                                actions.push('<a class="btn btn-danger btn-xs href="javascript:void(0)" onclick="$.operate.cancleMerge(\'' + row.patchId + '\')"><i class="fa fa-backward"></i>取消合并</a> ');
+                            }
+                            if (row.pulledFlag == "N") {
+                                actions.push('<a class="btn btn-success btn-xs" href="javascript:void(0)" onclick="downloadPatchFile(\'' + row.patchId + '\', \'' + row.bugFlag + '\', \'' + row.repairName + '\', \'' + row.updateBy + '\', \'' + row.mergePackageFlag + '\', \'' + row.bugName + '\', \'' + row.bugDutyName + '\', \'' + row.bugNoFix + '\', \'' + row.pulledFlag + '\',\'' + row.pulledList + '\')"><i class="fa fa-download"></i>拉取</a>');
+                            }
+                        }
+                        // 合包打包失败，可重新打包
+                        if (row.patchStatus == 25) {
+                            if (row.mergePackageFlag == 'Y') {
+                                actions.push('<a class="btn btn-info btn-xs href="javascript:void(0)" onclick="rePatch(\'' + row.patchId + '\')"><i class="fa fa-recycle"></i>重新合包</a> ');
+                            }
+                        }
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+
+    // 产品项目联动
+    var projectAndProduct = [[${projectAndProduct}]];
+    $('#projectProduct').cxSelect({
+        selects: ['type', 'router'],
+        jsonValue: 'v',
+        required: true,
+        data: projectAndProduct
+    });
+
+    // 拉取
+    /*function downloadPatchFile(patchId) {
+        debugger;
+        table.set();
+        $.modal.loading("正在拉取中，请稍后...");
+        var data = {"patchId" : patchId};
+        $.operate.submit(table.options.downloadPatchFile, "post", "json", data);
+        parent.$.table.refresh();
+        $.modal.closeLoading();
+    }*/
+
+    // 拉取
+    function downloadPatchFile(patchId,bugFlag,repairName,updateBy,mergePackageFlag,bugName,bugDutyName,bugNoFix,mergePackageAllFix, pulledList) {
+        if(bugFlag == 'Y'  ){
+            var mssage = "";
+            if(mergePackageFlag == 'Y'){
+                if(bugNoFix != 'Y'){
+                    mssage = "请注意！您拉取的合并包中有BUG包，BUG包为"+bugName+"<br>BUG包的修复包已发布，修复任务为"+repairName+"<br>建议取消合并，然后合并修复任务及其前面的所有补丁包，共同拉取升级！";
+                    if(mergePackageAllFix == 'Y'){ //如果合包里面包含所有的修复包，则直接拉取
+                        downloadPatch(patchId, pulledList);
+                        return;
+                    }
+                }else{
+                    mssage = "请注意！您拉取的合并包中有BUG包，BUG包为"+bugName+"<br>BUG包的修复包尚未发布，建议联系BUG包责任人"+bugDutyName+"。建议取消合并，然后合并BUG包前的补丁包拉取升级。或待修复任务发布后，合并修复任务及其前面的所有补丁包，共同拉取升级！";
+                }
+            }else{
+                if(repairName != null && repairName != ''&& repairName != 'null'){
+                    mssage = "请注意！您拉取的补丁包有BUG！BUG包的修复包已发布，修复任务为"+repairName+"，建议合并修复任务及其前面的所有补丁包，共同拉取升级！";
+                }else{
+                    mssage = "请注意！您拉取的补丁包有BUG！BUG包的修复包尚未发布，建议联系BUG包责任人"+updateBy+"，待修复任务发布后，合并修复任务及其前面的所有补丁包，共同拉取升级！";
+                }
+            }
+            $.modal.confirmCustom("继续拉取","确定",mssage, function () {
+                downloadPatch(patchId, pulledList);
+            });
+        }else{
+            downloadPatch(patchId, pulledList);
+        }
+
+    }
+    function downloadPatch(patchId, pulledList){
+        var downloadPatchFileUrl = table.options.downloadPatchFile;
+        $.modal.loading("正在拉取中，请稍后...");
+        $.post(downloadPatchFileUrl, {"patchId": patchId, "pulledList": pulledList}, function(result) {
+            if (result.code == web_status.SUCCESS) {
+                $.operate.ajaxSuccess(result);
+            } else {
+                $.modal.alertError(result.msg);
+            }
+            $.modal.closeLoading();
+        });
+    }
+
+    // 搜索
+    function searchPatch() {
+        var searchUrl = table.options.searchUrl;
+        // $.modal.loading("正在努力地加载数据中，请稍候……");
+        // $.post(searchUrl, $('#formId').serialize(), function(result) {
+        //     // if (result.code == web_status.SUCCESS) {
+        //     //     $.operate.ajaxSuccess('成功');
+        //     // } else {
+        //     //     $.modal.alertError('失败');
+        //     // }
+        //     $.modal.closeLoading();
+        // });
+
+        // 打开遮罩层
+        var message = "正在努力地加载数据中，请稍候……";
+        $.blockUI({ message: '<div class="loaderbox"><div class="loading-activity"></div> ' + message + '</div>' });
+
+        $.table.refresh();
+
+        // 关闭遮罩层
+        setTimeout(function(){
+            $.unblockUI();
+        }, 2000);
+    }
+
+    // 端合包失败重新打包
+    function rePatch(patchId) {
+        table.set();
+        var data = {"patchId" : patchId};
+        $.operate.submit(table.options.rePatchUrl, "post", "json", data);
+        parent.$.table.refresh();
+    }
+
+    // 合并包
+    function mergeDownlod() {
+        table.set();
+        var rows = $.common.isEmpty(table.options.uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(table.options.uniqueId);
+        if (rows.length < 2) {
+            $.modal.alertWarning("请至少选择两条记录");
+            return;
+        }
+        var allpacks = "";
+        //获取所有补丁包的信息
+        var topics = $.table.selectAllColumns('topic');
+        var childPackageName = $.table.selectAllColumns('childPackageName');
+        if (childPackageName && childPackageName.length > 0) {
+            for (var index = 0; index < childPackageName.length; index++) {
+                allpacks += childPackageName[index];
+            }
+        }
+        var patchFileName = $.table.selectAllColumns('patchFileName');
+        if (patchFileName && patchFileName.length > 0) {
+            for (var index = 0; index < patchFileName.length; index++) {
+                allpacks += patchFileName[index];
+            }
+        }
+
+        //获取所有bug任务所需的补丁包信息
+        var message = "";
+        var bugpackName = "";
+        var bugpackNameNoFix = "";
+        var fixpackNames = "";
+        var bugFlags = $.table.selectAllColumns('bugFlag');
+        var repairNameNoNums = $.table.selectAllColumns('repairNameNoNum');
+        var repairNames = $.table.selectAllColumns('repairName');
+        var repairIndex = 0;
+        if (bugFlags && bugFlags.length > 0) {
+            for (var index = 0; index < bugFlags.length; index++) {
+                if (bugFlags[index] == 'Y') { //如果是bug，查看合包是否有修复的任务
+                    var fixpackName = "";
+                    var repairNamesindex = repairNameNoNums[repairIndex];
+                    var repairNamesindexme = repairNames[repairIndex];
+                    if (repairNamesindex && repairNamesindex.length > 0) {
+                        repairIndex++;
+                        var repairNameArray =repairNamesindex.split("<br>");
+                        var repairNameArrayme =repairNamesindexme.split("<br>");
+                        for (var i = 0; i < repairNameArray.length; i++) {
+                            var repairName = repairNameArray[i];
+                            var repairNameme = repairNameArrayme[i];
+                            if (allpacks.indexOf(repairName) < 0) {//不包含
+                                fixpackName+=repairNameme+"<br>";
+                            }
+                        }
+                        if(fixpackName.length>0){
+                            bugpackName+=topics[index]+"<br>";
+                            fixpackNames+=fixpackName;
+                        }
+                    }else{
+                        bugpackNameNoFix+=topics[index]+"<br>";
+                    }
+                }
+            }
+        }
+        if(bugpackName.length>0){
+            message = "请注意！您合并的补丁包中有BUG包，BUG包为<br>"+bugpackName+"BUG包的修复包已发布，修复任务为<br>"+fixpackNames+"建议取消合并，然后合并修复任务及其前面的所有补丁包，共同拉取升级！";
+        }else {
+            message = "确认要合并选中的" + rows.length + "条数据吗?";
+        }
+        $.modal.confirmCustom("继续合并","取消",message, function () {
+            var url = table.options.mergeDownlodUrl;
+            var data = {"ids": rows.join()};
+            $.operate.submit(url, "post", "json", data);
+        });
+        $.table.refresh();
+    }
+
+    //列单击
+    function onClickCell(field, value, row, $element) {
+        if (field == "configFlag" && row.configFlag == "Y") {
+            layer.alert(row.configList == null || row.configList == "" ? "配置内容为空" : row.configList, {
+                icon: $.modal.icon(""),
+                title: "配置内容",
+                btn: ['确认'],
+                btnclass: ['btn btn-primary'],
+            });
+        } else if (field == "mergePackageFlag" && row.mergePackageFlag == "Y") {
+            table.set();
+            var patchId = row.patchId;
+            var url2 = $.common.isEmpty(patchId) ? table.options.jiraListUrl.replace("{patchId}", "") : table.options.jiraListUrl.replace("{patchId}", patchId);
+            $.modal.open("合并包内容列表", url2, 900);
+        } else if (field == "jiraNo") {
+            var topicValue = row.topic;
+            if (topicValue) {
+                topicValue = topicValue.replace(/\'/g,"&apos;");
+                topicValue = topicValue.replace(/\r/g,"<br>");
+                topicValue = topicValue.replace(/\"/g,"&quot;");
+            }
+            layer.alert(topicValue == null || topicValue == "" ? "任务名为空" : topicValue, {
+                icon: $.modal.icon(""),
+                title: "任务名",
+                btn: ['确认'],
+                btnclass: ['btn btn-primary'],
+            });
+        } else if (field == "demandNo") {
+            var demandNameValue = row.demandName;
+            if (demandNameValue) {
+                demandNameValue = demandNameValue.replace(/\'/g,"&apos;");
+                demandNameValue = demandNameValue.replace(/\r/g,"<br>");
+                demandNameValue = demandNameValue.replace(/\"/g,"&quot;");
+            }
+            layer.alert(demandNameValue == null || demandNameValue == "" ? "需求名为空" : demandNameValue, {
+                icon: $.modal.icon(""),
+                title: "需求名",
+                btn: ['确认'],
+                btnclass: ['btn btn-primary'],
+            });
+        }else if(field == "bugfixFlag" && row.bugfixFlag == "Y"){
+            if(row.bugfixName != null && row.bugfixName != ""){
+                layer.alert(row.bugfixName, {
+                    icon: "",
+                    title: "修复的BUG任务",
+                    btn: ['确认'],
+                    btnclass: ['btn btn-primary'],
+                });
+            }
+        }else if(field == "bugFlag" && row.bugFlag == "Y") {
+            layer.alert(row.repairName != null && row.repairName != ""?row.repairName:"无", {
+                icon: "",
+                title: "修复任务",
+                btn: ['确认'],
+                btnclass: ['btn btn-primary'],
+            });
+        }
+    }
+
+    // 改变表格
+    function changeTable() {
+        var patchType = $.form.selectSelects("patchType");
+        // 版本包
+        if(patchType == 2) {
+            // 去掉操作列，更改按钮为生成版本包
+            $('#mergeId').text('生成版本包');
+        } else {
+            $('#mergeId').text('合并包');
+        }
+    }
+</script>
+</body>
+</html>

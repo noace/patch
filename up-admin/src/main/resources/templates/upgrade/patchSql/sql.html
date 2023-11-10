@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('执行SQL列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>项目：</label>
+                                <select name="projectId" th:with="plist=${@upHelper.getProjectList()}">
+                                    <option value="">所有</option>
+                                    <option th:each="project : ${plist}" th:text="${project.projectName}" th:value="${project.projectId}"></option>
+                                </select>
+                            </li>
+                            <li>
+                                <label>产品：</label>
+                                <select name="productId" th:with="plist=${@upHelper.getProductList()}">
+                                    <option value="">所有</option>
+                                    <option th:each="product : ${plist}" th:text="${product.productName}" th:value="${product.productId}"></option>
+                                </select>
+                            </li>
+                            <li>
+                                <label>补丁包名称：</label>
+                                <input type="text" name="patchFileName"/>
+                            </li>
+                            <li>
+                                <label>sql名称：</label>
+                                <input type="text" name="sqlName"/>
+                            </li>
+                            <li class="select-time">
+                                <label>创建时间： </label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <!--<a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="upgrade:sql:add">-->
+                    <!--<i class="fa fa-plus"></i> 添加-->
+                <!--</a>-->
+                <!--<a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="upgrade:sql:edit">-->
+                    <!--<i class="fa fa-edit"></i> 修改-->
+                <!--</a>-->
+                <!--<a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="upgrade:sql:remove">-->
+                    <!--<i class="fa fa-remove"></i> 删除-->
+                <!--</a>-->
+                <a class="btn btn-info multiple disabled" onclick="batchDownload()" shiro:hasPermission="upgrade:patchSql:download">
+                <i class="fa fa-download"></i> 批量下载
+                </a>
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="upgrade:patchSql:export">
+                    <i class="fa fa-download"></i> 导出
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        // var editFlag = [[${@permission.hasPermi('upgrade:patchSql:edit')}]];
+        // var removeFlag = [[${@permission.hasPermi('upgrade:patchSql:remove')}]];
+        var prefix = ctx + "upgrade/patchSql";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                batchDownloadUrl: prefix + "/batchDownload",
+                modalName: "执行SQL",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id',
+                    title: '主键ID',
+                    visible: false
+                },
+                {
+                    field: 'patchId',
+                    title: '补丁包ID',
+                    visible: false
+                },
+                {
+                    field: 'productName',
+                    title: '产品'
+                },
+                {
+                    field: 'projectName',
+                    title: '项目'
+                },
+                {
+                    field: 'sqlName',
+                    title: 'sql名称'
+                },
+                {
+                    field: 'sqlPath',
+                    title: 'sql路径',
+                    visible: false
+                },
+                {
+                    field: 'patchFileName',
+                    title: '补丁包名称'
+                },
+                {
+                    field: 'createBy',
+                    title: '创建人'
+                },
+                {
+                    field: 'createTime',
+                    title: '创建时间',
+                    sortable: true
+                },
+                {
+                    field: 'updateTime',
+                    title: '修改时间',
+                    sortable: true
+                },
+                {
+                    field: 'remark',
+                    title: '备注',
+                    visible: false
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        // actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        // actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="$.operate.downloadFile(\'' + row.sqlPath + '\')"><i class="fa fa-download"></i>下载</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+
+        function batchDownload() {
+            var rows = $.common.isEmpty(table.options.uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(table.options.uniqueId);
+            if (rows.length == 0) {
+                $.modal.alertWarning("请至少选择一条记录");
+                return;
+            }
+            $.modal.confirm("确认要下载选中的" + rows.length + "条数据吗?", function() {
+                var url = table.options.batchDownloadUrl;
+                var data = { "ids": rows.join() };
+
+                // 若依框架不好用，使用原生Ajax请求
+                $.ajax({
+                    url:url,
+                    type:"post",
+                    data: data,
+                    success:function(reply){
+                        debugger;
+                        if (reply == '' || reply == null) {
+                            $.modal.msgWarning("没有找到SQL!");
+                        } else if(reply.code == 500){
+                            $.modal.msgWarning(reply.msg);
+                        } else {
+                            window.location.href = ctx + "common/download/resource?resource=" + encodeURI(reply);
+                        }
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

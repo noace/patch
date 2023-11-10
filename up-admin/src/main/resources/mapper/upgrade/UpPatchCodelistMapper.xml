@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpPatchCodelistMapper">
+    
+    <resultMap type="com.kyee.upgrade.domain.UpPatchCodelist" id="UpPatchCodelistResult">
+        <result property="codeId"    column="code_id"    />
+        <result property="patchId"    column="patch_id"    />
+        <result property="productId"    column="product_id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="codePath"    column="code_path"    />
+        <result property="compilePath"    column="compile_path"    />
+        <result property="fileType"    column="file_type"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectUpPatchCodelistVo">
+        select code_id, patch_id, product_id, project_id, code_path, compile_path, file_type, create_by, create_time, update_by, update_time, del_flag, remark from up_patch_codelist
+    </sql>
+
+    <select id="selectUpPatchCodelistList" parameterType="com.kyee.upgrade.domain.UpPatchCodelist" resultMap="UpPatchCodelistResult">
+        <include refid="selectUpPatchCodelistVo"/>
+        <where>
+            <if test="patchId != null "> and patch_id = #{patchId}</if>
+            <if test="productId != null "> and product_id = #{productId}</if>
+            <if test="projectId != null "> and project_id = #{projectId}</if>
+            <if test="codePath != null  and codePath != ''"> and code_path = #{codePath}</if>
+            <if test="compilePath != null  and compilePath != ''"> and compile_path = #{compilePath}</if>
+            <if test="fileType != null  and fileType != ''"> and file_type = #{fileType}</if>
+        </where>
+    </select>
+    
+    <select id="selectUpPatchCodelistById" parameterType="Long" resultMap="UpPatchCodelistResult">
+        <include refid="selectUpPatchCodelistVo"/>
+        where code_id = #{codeId}
+    </select>
+    
+    <insert id="insertUpPatchCodelist" parameterType="com.kyee.upgrade.domain.UpPatchCodelist" useGeneratedKeys="true" keyProperty="codeId">
+        insert into up_patch_codelist
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="patchId != null">patch_id,</if>
+            <if test="productId != null">product_id,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="codePath != null and codePath != ''">code_path,</if>
+            <if test="compilePath != null and compilePath != ''">compile_path,</if>
+            <if test="fileType != null and fileType != ''">file_type,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null and updateBy != ''">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="patchId != null">#{patchId},</if>
+            <if test="productId != null">#{productId},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="codePath != null and codePath != ''">#{codePath},</if>
+            <if test="compilePath != null and compilePath != ''">#{compilePath},</if>
+            <if test="fileType != null and fileType != ''">#{fileType},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpPatchCodelist" parameterType="com.kyee.upgrade.domain.UpPatchCodelist">
+        update up_patch_codelist
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="patchId != null">patch_id = #{patchId},</if>
+            <if test="productId != null">product_id = #{productId},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="codePath != null and codePath != ''">code_path = #{codePath},</if>
+            <if test="compilePath != null and compilePath != ''">compile_path = #{compilePath},</if>
+            <if test="fileType != null and fileType != ''">file_type = #{fileType},</if>
+            <if test="createBy != null and createBy != ''">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where patch_id = #{patchId}
+    </update>
+	
+	<update id="updateUpPatchCodelistByCodeId" parameterType="com.kyee.upgrade.domain.UpPatchCodelist">
+		update up_patch_codelist
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="patchId != null">patch_id = #{patchId},</if>
+			<if test="productId != null">product_id = #{productId},</if>
+			<if test="projectId != null">project_id = #{projectId},</if>
+			<if test="codePath != null and codePath != ''">code_path = #{codePath},</if>
+			<if test="compilePath != null and compilePath != ''">compile_path = #{compilePath},</if>
+			<if test="fileType != null and fileType != ''">file_type = #{fileType},</if>
+			<if test="createBy != null and createBy != ''">create_by = #{createBy},</if>
+			<if test="createTime != null">create_time = #{createTime},</if>
+			<if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+			<if test="updateTime != null">update_time = #{updateTime},</if>
+			<if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+			<if test="remark != null">remark = #{remark},</if>
+		</trim>
+		where code_id = #{codeId}
+	</update>
+
+    <delete id="deleteUpPatchCodelistById" parameterType="Long">
+        update up_patch_codelist set del_flag = 'Y', update_time=sysdate() where code_id = #{codeId}
+    </delete>
+
+    <delete id="deleteUpPatchCodelistByIds" parameterType="String">
+        update up_patch_codelist set del_flag = 'Y', update_time=sysdate() where code_id in
+        <foreach item="codeId" collection="array" open="(" separator="," close=")">
+            #{codeId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteUpPatchCodelistByPatchIds" parameterType="String">
+        update up_patch_codelist set del_flag = 'Y', update_time=sysdate(), update_by = #{loginName} where patch_id in
+        <foreach item="patchId" collection="patchIds" open="(" separator="," close=")">
+            #{patchId}
+        </foreach>
+    </delete>
+	
+	<delete id="deleteUpPatchCodelistByPathId" parameterType="Long">
+		delete from up_patch_codelist where patch_id = #{patchId}
+	</delete>
+	
+	<select id="selectUpPatchCodeListByPatchIds" resultMap="UpPatchCodelistResult">
+		<include refid="selectUpPatchCodelistVo"/>
+		<where>
+			patch_id in
+			<foreach collection="patchIds" item="patchId"  open="(" separator="," close=")">
+				#{patchId}
+			</foreach>
+		</where>
+	</select>
+
+    <select id="selectCodeListByPatchId" resultMap="UpPatchCodelistResult">
+        <include refid="selectUpPatchCodelistVo"/>
+        <where>
+            patch_id = #{patchId}
+        </where>
+    </select>
+
+    <select id="getSubByPatchIds" resultType="map">
+        select
+            up.patch_file_name,
+            upc.compile_path
+        from
+            up_patch_codelist upc
+        inner join up_patch up
+        on upc.patch_id = up.patch_id
+        <where>
+            upc.patch_id in
+            <foreach collection="patchIds" item="patchId"  open="(" separator="," close=")">
+                #{patchId}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="getCodePathWithPublish" resultType="com.kyee.upgrade.domain.vo.UpPatchCodeListPo">
+        SELECT
+          up.patch_id as patchId,
+          up.patch_file_name as patchFileName,
+          upc.code_path as codePath,
+          upc.file_type as fileType,
+          up.update_by as updateBy
+        FROM
+          up_patch up
+        INNER JOIN up_patch_codelist upc
+        ON up.patch_id = upc.patch_id
+        AND up.del_flag != 'Y'
+        AND upc.del_flag != 'Y'
+        WHERE
+          up.project_id = #{projectId}
+        AND up.product_id = #{productId}
+        AND up.patch_status = #{patchStatus}
+        AND up.patch_id in
+        <foreach collection="patchIds" open="(" item="patchId" close=")" separator=",">
+            #{patchId}
+        </foreach>
+        AND upc.file_type != 'SQL'
+        AND up.merge_package_flag = 'N'
+    </select>
+</mapper>

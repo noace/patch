@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('升级管理列表')"/>
+    <th:block th:include="include :: select2-css"/>
+    <th:block th:include="include :: bootstrap-select-css"/>
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <label>项目：</label>
+                            <select name="projectId" th:with="plist=${@upHelper.getProjectList()}">
+                                <option value="">所有</option>
+                                <option th:each="project : ${plist}" th:text="${project.projectName}"
+                                        th:value="${project.projectId}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <label>产品：</label>
+                            <select name="productId" class="form-control m-b"
+                                    th:with="plist=${@upHelper.getProductList()}" required>
+                                <option value="">所有</option>
+                                <option th:each="product : ${plist}" th:text="${product.productName}"
+                                        th:value="${product.productId}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <label th:style="'width: 100px;'">服务器名称：</label>
+                            <select name="serverId" th:with="slist=${@upHelper.getServerList()}">
+                                <option value="">所有</option>
+                                <option th:each="server : ${slist}" th:text="${server.serverName}"
+                                        th:value="${server.serverId}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <label th:style="'width: 100px;'">服务器状态：</label>
+                            <select name="serverStatus">
+                                <option value="">所有</option>
+                                <option value="30">未启动</option>
+                                <option value="50">已启动</option>
+                            </select>
+                        <li>
+                        <li>
+                            <label>服务器IP：</label>
+                            <input type="text" name="serverIp"/>
+                        </li>
+                        <li>
+                            <label>端口：</label>
+                            <input type="text" name="serverPort"/>
+                        </li>
+                        <li>
+                            <label>项目路径：</label>
+                            <input type="text" name="serverPath"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer"/>
+<th:block th:include="include :: bootstrap-table-export-js"/>
+<script th:inline="javascript">
+    var serverStatusDatas = [[${@dict.getType('up_server_status')}]];
+    var prefix = ctx + "upgrade/uprecordClient";
+    var today = new Date();
+    var warningDays = 1000*60*60*24;
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            importUrl: prefix + "/importData",
+            importTemplateUrl: prefix + "/importTemplate",
+            downloadControl: prefix + "/downloadControl",
+            upgradeUrl: prefix + "/upgrade/{serverId}/{productId}/{projectId}",
+            modalName: "升级管理",
+            columns: [{
+                checkbox: true,
+                cellStyle: function(value, row, index) {
+                    debugger;
+                    if(row.noUpMinTime == ""){
+                        return {css:{"background-color": "#C1E6C6"}};
+                    }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                        return {css:{"background-color": "#F7A54A"}};
+                    }else {
+                        return {css:{"background-color": "#FFFFFF"}};
+                    }
+                }
+            },
+                {
+                    field: 'serverId',
+                    title: '服务ID',
+                    visible: false,
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    field: 'serverName',
+                    title: '服务器名称',
+                    sortable: true,
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    field: 'serverType',
+                    title: '服务器类型',
+                    sortable: true,
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    field: 'serviceType',
+                    title: '服务类型',
+                    visible: false,
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    field: 'projectName',
+                    title: '项目',
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    field: 'productName',
+                    title: '产品',
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    field: 'serverIp',
+                    title: '服务器IP',
+                    sortable: true,
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    field: 'serverPort',
+                    title: '端口',
+                    sortable: true,
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    field: 'serverPath',
+                    title: '项目路径',
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    field: 'serverStatus',
+                    title: '服务器状态',
+                    sortable: true,
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(serverStatusDatas, value);
+                    },
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    field: 'lastUpgradePackage',
+                    title: '最后升级补丁包',
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    field: 'lastUpgradePerson',
+                    title: '最后升级人员',
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    field: 'lastUpgradeTime',
+                    title: '最后升级时间',
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    field: 'noUpNum',
+                    title: '未升级补丁包数',
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    field: 'noUpMinTime',
+                    title: '未升级补丁包最小时间',
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs href=" javascript:void(0)" onclick="upgrade(\'' + row.serverId + '\',\'' + row.productId + '\',\'' + row.projectId + '\')">' + '<i class="fa fa-level-up"></i>升级</a> ');
+                        return actions.join('');
+                    },
+                    cellStyle: function(value, row, index) {
+                        debugger;
+                        if(row.noUpMinTime == ""){
+                            return {css:{"background-color": "#C1E6C6"}};
+                        }else if (today - new Date(row.noUpMinTime) >= warningDays){
+                            return {css:{"background-color": "#F7A54A"}};
+                        }else {
+                            return {css:{"background-color": "#FFFFFF"}};
+                        }
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+    // 升级
+    function upgrade(serverId, productId, projectId) {
+        var url = table.options.upgradeUrl;
+        var serverIdUrl = $.common.isEmpty(serverId) ? url.replace("{serverId}", "") : url.replace("{serverId}", serverId);
+        var productIdUrl = $.common.isEmpty(productId) ? serverIdUrl.replace("{productId}", "") : serverIdUrl.replace("{productId}", productId);
+        var upgradeUrl = $.common.isEmpty(projectId) ? productIdUrl.replace("{projectId}", "") : productIdUrl.replace("{projectId}", projectId);
+        $.modal.open("补丁包管理列表", upgradeUrl, 1500);
+    }
+</script>
+<th:block th:include="include :: select2-js"/>
+<th:block th:include="include :: bootstrap-select-js"/>
+</body>
+</html>

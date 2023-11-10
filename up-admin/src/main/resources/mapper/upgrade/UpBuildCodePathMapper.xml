@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpBuildCodePathMapper">
+    
+    <resultMap type="com.kyee.upgrade.domain.UpBuildCodePath" id="UpBuildCodePathResult">
+        <result property="codePathId"    column="code_path_id"    />
+        <result property="commitId"    column="commit_id"    />
+        <result property="codePath"    column="code_path"    />
+        <result property="codeChangeType"    column="code_change_type"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectUpBuildCodePathVo">
+        select code_path_id, commit_id, code_path, code_change_type, del_flag, remark from up_build_code_path
+    </sql>
+
+    <select id="selectUpBuildCodePathList" parameterType="com.kyee.upgrade.domain.UpBuildCodePath" resultMap="UpBuildCodePathResult">
+        <include refid="selectUpBuildCodePathVo"/>
+        <where>
+            <if test="commitId != null "> and commit_id = #{commitId}</if>
+            <if test="codePath != null  and codePath != ''"> and code_path = #{codePath}</if>
+            <if test="codeChangeType != null  and codeChangeType != ''"> and code_change_type = #{codeChangeType}</if>
+        </where>
+    </select>
+    
+    <select id="selectUpBuildCodePathById" parameterType="Long" resultMap="UpBuildCodePathResult">
+        <include refid="selectUpBuildCodePathVo"/>
+        where code_path_id = #{codePathId}
+    </select>
+    
+    <insert id="insertUpBuildCodePath" parameterType="com.kyee.upgrade.domain.UpBuildCodePath" useGeneratedKeys="true" keyProperty="codePathId">
+        insert into up_build_code_path
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="commitId != null">commit_id,</if>
+            <if test="codePath != null and codePath != ''">code_path,</if>
+            <if test="codeChangeType != null and codeChangeType != ''">code_change_type,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="commitId != null">#{commitId},</if>
+            <if test="codePath != null and codePath != ''">#{codePath},</if>
+            <if test="codeChangeType != null and codeChangeType != ''">#{codeChangeType},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpBuildCodePath" parameterType="com.kyee.upgrade.domain.UpBuildCodePath">
+        update up_build_code_path
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="commitId != null">commit_id = #{commitId},</if>
+            <if test="codePath != null and codePath != ''">code_path = #{codePath},</if>
+            <if test="codeChangeType != null and codeChangeType != ''">code_change_type = #{codeChangeType},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where code_path_id = #{codePathId}
+    </update>
+
+    <delete id="deleteUpBuildCodePathById" parameterType="Long">
+        update up_build_code_path set del_flag = 'Y', update_time=sysdate() where code_path_id = #{codePathId}
+    </delete>
+
+    <delete id="deleteUpBuildCodePathByIds" parameterType="String">
+        update up_build_code_path set del_flag = 'Y', update_time=sysdate() where code_path_id in
+        <foreach item="codePathId" collection="array" open="(" separator="," close=")">
+            #{codePathId}
+        </foreach>
+    </delete>
+
+    <insert id="batchInsertUpBuildCodePath" parameterType="com.kyee.upgrade.domain.UpBuildCodePath">
+        INSERT INTO
+            up_build_code_path(
+                code_path_id,
+                commit_id,
+                code_path,
+                code_change_type,
+                del_flag,
+                remark
+            )
+        VALUES
+        <foreach collection="upBuildCodePathList" item="codePath" separator=",">
+            (
+                #{codePath.codePathId, jdbcType=BIGINT},
+                #{codePath.commitId, jdbcType=VARCHAR},
+                #{codePath.codePath, jdbcType=VARCHAR},
+                #{codePath.codeChangeType, jdbcType=VARCHAR},
+                #{codePath.delFlag, jdbcType=VARCHAR},
+                #{codePath.remark, jdbcType=VARCHAR}
+            )
+        </foreach>
+
+    </insert>
+
+</mapper>

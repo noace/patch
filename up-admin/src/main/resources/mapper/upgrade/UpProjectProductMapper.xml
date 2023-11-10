@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpProjectProductMapper">
+    
+    <resultMap type="com.kyee.upgrade.domain.UpProjectProduct" id="UpProjectProductResult">
+        <result property="projectProductId"    column="project_product_id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="projectName"    column="project_name"    />
+        <result property="productId"    column="product_id"    />
+        <result property="productName"    column="product_name"    />
+        <result property="productPrincipalId"    column="product_principal_id"    />
+        <result property="productPrincipal"    column="product_principal"    />
+        <result property="sourceBranchName"    column="source_branch_name"    />
+        <result property="branchType"    column="branch_type"    />
+        <result property="dbVersion"    column="db_version"    />
+        <result property="minServerVersion"    column="min_server_version"    />
+        <result property="maxServerVersion"    column="max_server_version"    />
+        <result property="lastUpgradeTime"    column="last_upgrade_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="autoUpgradeFlag"    column="auto_upgrade_flag"    />
+        <result property="excuteFlag"    column="excute_flag"    />
+        <result property="excuteDevFlag"    column="excute_dev_flag"    />
+        <result property="testFlag"    column="test_flag"    />
+        <result property="buildType"    column="build_type"    />
+        <result property="patchBranch"    column="patch_branch"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+        <result property="projectPrincipal"    column="project_principal"    />
+        <result property="projectPrincipalId"    column="project_principal_id"    />
+        <result property="testPrincipal"    column="test_principal"    />
+    </resultMap>
+
+    <sql id="selectProjectProduct">
+          SELECT
+            project_product_id,
+            project_id,
+            product_id,
+            product_principal_id,
+            product_principal,
+            source_branch_name,
+            branch_type,
+            db_version,
+            min_server_version,
+            max_server_version,
+            last_upgrade_time,
+            create_by,
+            create_time,
+            update_by,
+            update_time,
+            auto_upgrade_flag,
+            excute_flag,
+            excute_dev_flag,
+            test_flag,
+            build_type,
+            patch_branch,
+            del_flag,
+            remark
+            project_principal,
+            project_principal_id,
+            test_principal
+          FROM
+            up_project_product
+    </sql>
+
+    <sql id="selectUpProjectProductVo">
+        SELECT
+          project_product_id,
+          pp.project_id,
+          pj.project_name,
+          pp.product_id,
+          pd.product_name,
+          pp.product_principal_id,
+          pp.product_principal,
+          source_branch_name,
+          branch_type,
+          db_version,
+          min_server_version,
+          max_server_version,
+          last_upgrade_time,
+	      pp.create_by,
+	      pp.create_time,
+	      pp.update_by,
+	      pp.update_time,
+	      pp.auto_upgrade_flag,
+          pp.excute_flag,
+          pp.excute_dev_flag,
+          pp.test_flag,
+          pp.build_type,
+          pp.patch_branch,
+	      pp.del_flag,
+	      pp.remark,
+	      pp.project_principal,
+	      pp.project_principal_id,
+	      pp.test_principal
+        FROM
+          up_project_product pp
+        INNER JOIN up_project pj ON pp.project_id = pj.project_id and pj.del_flag != 'Y'
+        INNER JOIN up_product pd ON pp.product_id = pd.product_id and pd.del_flag != 'Y'
+    </sql>
+
+    <select id="selectUpProjectProductList" parameterType="com.kyee.upgrade.domain.UpProjectProduct" resultMap="UpProjectProductResult">
+        <include refid="selectUpProjectProductVo"/>
+        <where>
+            <if test="projectId != null "> and pp.project_id = #{projectId}</if>
+            <if test="productId != null "> and pp.product_id = #{productId}</if>
+            <if test="productPrincipalId != null "> and pp.product_principal_id = #{productPrincipalId}</if>
+            <if test="sourceBranchName != null  and sourceBranchName != ''"> and source_branch_name like concat('%', #{sourceBranchName}, '%')</if>
+            <if test="delFlag != null  and delFlag != ''"> and pp.del_flag = #{delFlag}</if>
+            <if test="branchType != null "> and pp.branch_type = #{branchType}</if>
+            <if test="testFlag != null "> and pp.test_flag = #{testFlag}</if>
+        </where>
+    </select>
+    
+    <select id="selectUpProjectProductById" parameterType="Integer" resultMap="UpProjectProductResult">
+        <include refid="selectUpProjectProductVo"/>
+        where project_product_id = #{projectProductId}
+    </select>
+    
+    <insert id="insertUpProjectProduct" parameterType="com.kyee.upgrade.domain.UpProjectProduct" useGeneratedKeys="true" keyProperty="projectProductId">
+        insert into up_project_product
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">project_id,</if>
+            <if test="productId != null">product_id,</if>
+            <if test="productPrincipalId != null">product_principal_id,</if>
+            <if test="productPrincipal != null">product_principal,</if>
+            <if test="sourceBranchName != null and sourceBranchName != ''">source_branch_name,</if>
+            <if test="branchType != null and branchType != ''">branch_type,</if>
+            <if test="dbVersion != null">db_version,</if>
+            <if test="minServerVersion != null">min_server_version,</if>
+            <if test="maxServerVersion != null">max_server_version,</if>
+            <if test="lastUpgradeTime != null">last_upgrade_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="autoUpgradeFlag != null">auto_upgrade_flag,</if>
+            <if test="excuteFlag != null">excute_flag,</if>
+            <if test="excuteDevFlag != null">excute_dev_flag,</if>
+            <if test="testFlag != null">test_flag,</if>
+            <if test="buildType != null">build_type,</if>
+            <if test="patchBranch != null">patch_branch,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="remark != null">remark,</if>
+            <if test="projectPrincipal != null">project_principal,</if>
+            <if test="projectPrincipalId != null">project_principal_id,</if>
+            <if test="testPrincipal != null">test_principal,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">#{projectId},</if>
+            <if test="productId != null">#{productId},</if>
+            <if test="productPrincipalId != null">#{productPrincipalId},</if>
+            <if test="productPrincipal != null">#{productPrincipal},</if>
+            <if test="sourceBranchName != null and sourceBranchName != ''">#{sourceBranchName},</if>
+            <if test="branchType != null and branchType != ''">#{branchType},</if>
+            <if test="dbVersion != null">#{dbVersion},</if>
+            <if test="minServerVersion != null">#{minServerVersion},</if>
+            <if test="maxServerVersion != null">#{maxServerVersion},</if>
+            <if test="lastUpgradeTime != null">#{lastUpgradeTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="autoUpgradeFlag != null">#{autoUpgradeFlag},</if>
+            <if test="excuteFlag != null">#{excuteFlag},</if>
+            <if test="excuteDevFlag != null">#{excuteDevFlag},</if>
+            <if test="testFlag != null">#{testFlag},</if>
+            <if test="buildType != null">#{buildType},</if>
+            <if test="patchBranch != null">#{patchBranch},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="projectPrincipal != null">#{projectPrincipal},</if>
+            <if test="projectPrincipalId != null">#{projectPrincipalId},</if>
+            <if test="testPrincipal != null">#{testPrincipal},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpProjectProduct" parameterType="com.kyee.upgrade.domain.UpProjectProduct">
+        update up_project_product
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="productId != null">product_id = #{productId},</if>
+            <if test="productPrincipalId != null">product_principal_id = #{productPrincipalId},</if>
+            <if test="productPrincipal != null">product_principal = #{productPrincipal},</if>
+            <if test="sourceBranchName != null and sourceBranchName != ''">source_branch_name = #{sourceBranchName},</if>
+            <if test="branchType != null and branchType != ''">branch_type = #{branchType},</if>
+            <if test="dbVersion != null">db_version = #{dbVersion},</if>
+            <if test="minServerVersion != null">min_server_version = #{minServerVersion},</if>
+            <if test="maxServerVersion != null">max_server_version = #{maxServerVersion},</if>
+            <if test="lastUpgradeTime != null">last_upgrade_time = #{lastUpgradeTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="autoUpgradeFlag != null">auto_upgrade_flag = #{autoUpgradeFlag},</if>
+            <if test="excuteFlag != null">excute_flag = #{excuteFlag},</if>
+            <if test="excuteDevFlag != null">excute_dev_flag = #{excuteDevFlag},</if>
+            <if test="testFlag != null">test_flag = #{testFlag},</if>
+            <if test="buildType != null">build_type = #{buildType},</if>
+            <if test="patchBranch != null">patch_branch = #{patchBranch},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="projectPrincipal != null">project_principal = #{projectPrincipal},</if>
+            <if test="projectPrincipalId != null">project_principal_id = #{projectPrincipalId},</if>
+            <if test="testPrincipal != null">test_principal = #{testPrincipal},</if>
+        </trim>
+        where project_product_id = #{projectProductId}
+    </update>
+
+    <delete id="deleteUpProjectProductById" parameterType="Integer">
+        update up_project_product set del_flag = 'Y', update_time=sysdate() where project_product_id = #{projectProductId}
+    </delete>
+
+    <delete id="deleteUpProjectProductByIds" parameterType="String">
+        update up_project_product set del_flag = 'Y', update_time=sysdate() where project_product_id in
+        <foreach item="projectProductId" collection="array" open="(" separator="," close=")">
+            #{projectProductId}
+        </foreach>
+    </delete>
+
+    <select id="selectByProductIdAndProjectId" parameterType="com.kyee.upgrade.domain.UpProjectProduct" resultMap="UpProjectProductResult">
+        <include refid="selectUpProjectProductVo"/>
+        <where>
+            pp.del_flag != 'Y'
+            <if test="projectId != null "> and pp.project_id = #{projectId, jdbcType=BIGINT}</if>
+            <if test="productId != null "> and pp.product_id = #{productId, jdbcType=BIGINT}</if>
+        </where>
+    </select>
+	
+	<select id="getLastInsertId" resultType="long">
+		SELECT LAST_INSERT_ID() AS id
+	</select>
+
+    <select id="getBuildTypeWithPatchId" resultMap="UpProjectProductResult">
+        select upp.*
+            FROM up_project_product upp
+            INNER JOIN up_patch up
+            ON upp.project_id = up.project_id
+            AND upp.product_id = up.product_id
+        WHERE up.patch_id = #{patchId}
+	</select>
+
+    <select id="getUpProjectProductById" resultMap="UpProjectProductResult">
+        <include refid="selectProjectProduct"/>
+        <where>
+            <if test="productId != null "> product_id = #{productId, jdbcType=INTEGER}</if>
+            <if test="projectId != null "> and project_id = #{projectId, jdbcType=INTEGER}</if>
+        </where>
+	</select>
+
+</mapper>

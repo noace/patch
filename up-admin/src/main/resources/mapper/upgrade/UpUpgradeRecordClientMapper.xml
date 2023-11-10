@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpUpgradeRecordClientMapper">
+    
+    <resultMap type="com.kyee.upgrade.domain.UpUpgradeRecordClient" id="UpUpgradeRecordClientResult">
+        <result property="upgradeId"    column="upgrade_id"    />
+        <result property="serverId"    column="server_id"    />
+        <result property="serverName"    column="server_name"    />
+        <result property="patchId"    column="patch_id"    />
+        <result property="patchFileName"    column="patch_file_name"    />
+        <result property="upStatus"    column="up_status"    />
+        <result property="upTimes"    column="up_times"    />
+        <result property="lastUpWorker"    column="last_up_worker"    />
+        <result property="lastUpTime"    column="last_up_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <resultMap type="com.kyee.upgrade.domain.vo.UpPatchClientExtend" id="UpPatchClientExtend">
+        <result property="patchId"    column="patch_id"    />
+        <result property="productId"    column="product_id"    />
+        <result property="productName"    column="product_name"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="projectName"    column="project_Name"    />
+        <result property="patchFileName"    column="patch_file_name"    />
+        <result property="patchFileUrl"    column="patch_file_url"    />
+        <result property="sqlFlag"    column="sql_flag"    />
+        <result property="upBy"    column="up_by"    />
+        <result property="buildTime"    column="build_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+        <result property="patchStatus"    column="patch_status"    />
+        <result property="mergePackageFlag"    column="merge_package_flag"    />
+        <result property="configFlag"    column="config_flag"    />
+        <result property="configList"    column="config_list"    />
+        <result property="jiraNo"    column="jira_no"/>
+        <result property="topic"    column="topic"/>
+        <result property="codeList"    column="code_list"    />
+        <result property="realCodeList"    column="real_code_list"    />
+        <result property="compileList"    column="compile_list"    />
+        <result property="patchType"    column="patch_type"    />
+        <result property="autoUpgradeFlag"    column="auto_upgrade_flag"    />
+        <result property="expedited"    column="expedited"    />
+        <result property="taskType"    column="task_type"    />
+        <result property="demandNo"    column="demand_no"    />
+        <result property="demandName"    column="demand_name"    />
+        <result property="bugFlag"    column="bug_flag"    />
+        <result property="bugfixFlag"    column="bugfix_flag"    />
+        <result property="bugfixPatch"    column="bugfix_patch"    />
+        <result property="testStatus"    column="test_status"    />
+        <result property="upStatus"    column="up_status"    />
+        <result property="serverType"    column="server_type"    />
+    </resultMap>
+
+    <sql id="selectUpUpgradeRecordClientVo">
+        select p.upgrade_id,
+            p.server_id,
+            pj.server_name,
+            p.patch_id,
+            pd.patch_file_name,
+            p.up_status,
+            p.up_times,
+            p.last_up_worker,
+            p.last_up_time,
+            p.create_by,
+            p.create_time,
+            p.update_by,
+            p.update_time,
+            p.del_flag,
+            p.remark from up_upgrade_record_client p
+        INNER JOIN up_project_server pj ON p.server_id = pj.server_id and pj.del_flag = 'N'
+        INNER JOIN up_patch_client pd ON p.patch_id = pd.patch_id and pd.del_flag = 'N'
+    </sql>
+
+    <select id="selectUpUpgradeRecordClientList" parameterType="com.kyee.upgrade.domain.UpUpgradeRecordClient" resultMap="UpUpgradeRecordClientResult">
+        <include refid="selectUpUpgradeRecordClientVo"/>
+        <where>  
+            <if test="serverId != null "> and p.server_id = #{serverId}</if>
+            <if test="patchId != null "> and p.patch_id = #{patchId}</if>
+            <if test="upStatus != null  and upStatus != ''"> and p.up_status = #{upStatus}</if>
+            <if test="lastUpWorker != null  and lastUpWorker != ''"> and p.last_up_worker = #{lastUpWorker}</if>
+        </where>
+	    and p.del_flag != 'Y'
+    </select>
+	
+	<select id="getUpgradeRecordClientList" resultMap="UpUpgradeRecordClientResult">
+		<include refid="selectUpUpgradeRecordClientVo"/>
+		<where>
+			and p.patch_id = #{patchId}
+			and p.server_id
+			<foreach collection="serverIds" item="serverId" open="in (" close=")" separator=",">
+				#{serverId}
+			</foreach>
+		</where>
+		and p.del_flag != 'Y'
+	</select>
+
+    <select id="getLastUpgradeRecordList" resultMap="UpUpgradeRecordClientResult">
+        select
+            uurc.*,
+            upc.patch_file_name
+        from
+            up_patch_client upc
+        left join
+            up_upgrade_record_client uurc
+        on  uurc.patch_id = upc.patch_id
+        and uurc.del_flag = 'N'
+        left join
+            up_project_server ups
+        on  uurc.server_id = ups.server_id
+        and ups.del_flag = 'N'
+        <where>
+            upc.del_flag = 'N'
+            and uurc.server_id = #{serverId}
+            and upc.merge_package_flag in ('Y','N')
+            and upc.project_id = #{projectId}
+            and upc.product_id = #{productId}
+            and uurc.up_status = #{upgradeStatus}
+            <if test="serverType == '生产'">
+                and upc.patch_status in
+                <foreach collection="patchStatusList" separator="," open="(" close=")" item="patchStatus">
+                    #{patchStatus}
+                </foreach>
+            </if>
+            <if test="serverType == '测试'">
+                and upc.test_status in
+                <foreach collection="testStatusList" separator="," open="(" close=")" item="testStatus">
+                    #{testStatus}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY uurc.create_time DESC
+    </select>
+
+	<select id="getUpgradeRecordClient" resultMap="UpUpgradeRecordClientResult">
+		<include refid="selectUpUpgradeRecordClientVo"/>
+		<where>
+			<if test="patchId != null "> and p.patch_id = #{patchId}</if>
+			<if test="serverId != null "> and p.server_id = #{serverId}</if>
+		</where>
+		and p.del_flag != 'Y'
+	</select>
+    
+    <select id="selectUpUpgradeRecordClientById" parameterType="Long" resultMap="UpUpgradeRecordClientResult">
+        <include refid="selectUpUpgradeRecordClientVo"/>
+        where p.upgrade_id = #{upgradeId}
+	    and p.del_flag != 'Y'
+    </select>
+        
+    <insert id="insertUpUpgradeRecordClient" parameterType="com.kyee.upgrade.domain.UpUpgradeRecordClient" useGeneratedKeys="true" keyProperty="upgradeId">
+        insert into up_upgrade_record_client
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="serverId != null">server_id,</if>
+            <if test="patchId != null">patch_id,</if>
+            <if test="upStatus != null">up_status,</if>
+            <if test="upTimes != null">up_times,</if>
+            <if test="lastUpWorker != null">last_up_worker,</if>
+            <if test="lastUpTime != null">last_up_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="serverId != null">#{serverId},</if>
+            <if test="patchId != null">#{patchId},</if>
+            <if test="upStatus != null">#{upStatus},</if>
+            <if test="upTimes != null">#{upTimes},</if>
+            <if test="lastUpWorker != null">#{lastUpWorker},</if>
+            <if test="lastUpTime != null">#{lastUpTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpUpgradeRecordClient" parameterType="com.kyee.upgrade.domain.UpUpgradeRecordClient">
+        update up_upgrade_record_client
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="serverId != null">server_id = #{serverId},</if>
+            <if test="patchId != null">patch_id = #{patchId},</if>
+            <if test="upStatus != null">up_status = #{upStatus},</if>
+            <if test="upTimes != null">up_times = #{upTimes},</if>
+            <if test="lastUpWorker != null">last_up_worker = #{lastUpWorker},</if>
+            <if test="lastUpTime != null">last_up_time = #{lastUpTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where server_id = #{serverId}
+		and	  patch_id = #{patchId}
+    </update>
+
+    <delete id="deleteUpUpgradeRecordClientById" parameterType="Long">
+        update up_upgrade_record_client set del_flag = 'Y', update_time=sysdate() where patch_id = #{patchId}
+    </delete>
+
+    <delete id="deleteUpUpgradeRecordClientByIds" parameterType="String">
+        update up_upgrade_record_client set del_flag = 'Y', update_time=sysdate() where patch_id in
+        <foreach item="patchId" collection="array" open="(" separator="," close=")">
+            #{patchId}
+        </foreach>
+    </delete>
+
+    <select id="getUpgradeSqlPatch" resultMap="UpPatchClientExtend">
+        select
+            upc.*,
+            '' AS up_status
+        from
+            up_patch_client upc
+        <where>
+            upc.merge_package_flag in ('Y','N')
+            and upc.sql_flag = 'Y'
+            and upc.project_id = #{projectId}
+            and upc.product_id = #{productId}
+            and upc.del_flag = 'N'
+            AND (
+                SELECT COUNT(1) FROM up_upgrade_record_client uprc
+                WHERE uprc.patch_id = upc.patch_id
+                AND uprc.up_status IN ('30')
+            ) = 0
+            <if test="serverType == '测试'">
+                and upc.test_status = #{testStatus}
+            </if>
+            <if test="serverType == '生产'">
+                and upc.patch_status = #{patchStatus}
+            </if>
+        </where>
+        union all
+        select
+            upc.*,
+            uurc.up_status
+        from
+            up_patch_client upc
+        inner join up_upgrade_record_client uurc
+        on  uurc.patch_id = upc.patch_id
+        <where>
+            upc.merge_package_flag in ('Y','N')
+            and upc.sql_flag = 'Y'
+            and upc.project_id = #{projectId}
+            and upc.product_id = #{productId}
+            and upc.del_flag = 'N'
+            and uurc.up_status = '30'
+            <if test="serverType == '测试'">
+                and upc.test_status = #{testStatus}
+            </if>
+            <if test="serverType == '生产'">
+                and upc.patch_status = #{patchStatus}
+            </if>
+        </where>
+        order by build_time asc
+    </select>
+
+    <select id="getHistoryUpgradeSqlPatch" resultMap="UpPatchClientExtend">
+        select
+        upc.*,
+        '40' AS up_status
+        from
+        up_patch_client upc
+        <where>
+            upc.merge_package_flag in ('Y','N')
+            and upc.sql_flag = 'Y'
+            and upc.project_id = #{projectId}
+            and upc.product_id = #{productId}
+            and upc.del_flag = 'N'
+            <if test="serverType == '测试'">
+                and upc.test_status in
+                <foreach collection="testStatusList" separator="," open="(" close=")" item="testStatus">
+                    #{testStatus}
+                </foreach>
+            </if>
+            <if test="serverType == '生产'">
+                and upc.patch_status in
+                <foreach collection="patchStatusList" separator="," open="(" close=")" item="patchStatus">
+                    #{patchStatus}
+                </foreach>
+            </if>
+        </where>
+        order by upc.build_time asc
+    </select>
+
+    <select id="getUpgradeRecordPatch" resultMap="UpPatchClientExtend">
+        select
+            upc.*,
+            uurc.up_status
+        from
+            up_patch_client upc
+        left join
+            up_upgrade_record_client uurc
+        on uurc.patch_id = upc.patch_id
+        and uurc.del_flag = 'N'
+        and uurc.server_id = #{serverId}
+        <where>
+            upc.merge_package_flag in ('Y','N')
+            <if test="serverType == '测试'">
+                and upc.test_status in
+                <foreach collection="testStatusList" separator="," open="(" close=")" item="testStatus">
+                    #{testStatus}
+                </foreach>
+            </if>
+            <if test="serverType == '生产'">
+                and upc.patch_status in
+                <foreach collection="patchStatusList" separator="," open="(" close=")" item="patchStatus">
+                    #{patchStatus}
+                </foreach>
+            </if>
+            <if test="sqlFlag != null and sqlFlag != ''">
+                and upc.sql_flag = #{sqlFlag}
+            </if>
+            and upc.project_id = #{projectId}
+            and upc.product_id = #{productId}
+            and upc.del_flag = 'N'
+        </where>
+        order by upc.build_time asc
+    </select>
+
+    <select id="getPartUpgradePatch" resultMap="UpPatchClientExtend">
+        select
+            upc.*,
+            uurc.up_status
+        from
+            up_patch_client upc
+        left join
+            up_upgrade_record_client uurc
+        on  uurc.patch_id = upc.patch_id
+        and uurc.server_id = #{serverId}
+        where upc.del_flag = 'N'
+        and project_id = #{projectId}
+        and product_id = #{productId}
+        and merge_package_flag in ('N', 'Y')
+        and (upc.patch_status = #{patchStatus}
+        and (
+              select count(1) from up_upgrade_record_client uprc
+              where uprc.server_id = #{serverId}
+              and uprc.patch_id = upc.patch_id
+              and uprc.up_status not in (30,60)
+            ) = 0
+        )
+    </select>
+
+    <select id="getStartServerPatch" resultMap="UpPatchClientExtend">
+        select
+            upc.*,
+            uurc.up_status,
+            ups.server_type
+        from
+            up_patch_client upc
+        left join
+            up_upgrade_record_client uurc
+        on  uurc.patch_id = upc.patch_id
+        and uurc.del_flag = 'N'
+        left join
+            up_project_server ups
+        on  uurc.server_id = ups.server_id
+        and ups.del_flag = 'N'
+        <where>
+            upc.del_flag = 'N'
+            and upc.project_id = #{projectId}
+            and upc.product_id = #{productId}
+            and uurc.server_id = #{serverId}
+            and upc.merge_package_flag in ('Y','N')
+            and uurc.up_status in
+            <foreach collection="upgradeStatusList" separator="," open="(" close=")" item="status">
+                #{status}
+            </foreach>
+            <if test="sqlFlag != null and sqlFlag != ''">
+                and upc.sql_flag = #{sqlFlag}
+            </if>
+            <if test="serverType == '生产'">
+                and upc.patch_status in
+                <foreach collection="patchStatusList" separator="," open="(" close=")" item="patchStatus">
+                    #{patchStatus}
+                </foreach>
+            </if>
+            <if test="serverType == '测试'">
+                and upc.test_status in
+                <foreach collection="patchStatusList" separator="," open="(" close=")" item="patchStatus">
+                    #{patchStatus}
+                </foreach>
+            </if>
+        </where>
+        order by upc.build_time asc
+    </select>
+
+</mapper>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增补丁包管理')" />
+    <th:block th:include="include :: select2-css"/>
+    <th:block th:include="include :: bootstrap-select-css"/>
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal" id="form-patch-regist">
+            <div id="projectProduct" class="row form-group">
+                <label class="col-sm-2 control-label is-required">产品：</label>
+                <div class="col-sm-4">
+                    <select id="productId" name="productId" class="type form-control" required onchange="onchangeByProduct()">
+                        <!--                        <option th:each="product : ${plist}" th:text="${product.productName}" th:value="${product.productId}"></option>-->
+                    </select>
+                </div>
+                <label class="col-sm-2 control-label is-required" id="projectLabel">项目：</label>
+                <div class="col-sm-4" id="projectId">
+                    <!--TODO branch-->
+                    <select name="projectId" class="router form-control" required onchange="onchangeByProject()">
+                    <!--<select name="projectId" class="router form-control" required>-->
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div id="searchCode">
+                    <label class="col-sm-2 control-label is-required">提交序号：</label>
+                    <div class="col-sm-8">
+                        <input id="commitId" name="commitId" class="form-control" type="text" placeholder="若多次合并,请以#隔开,例:245#570;查询完成,请检查代码列表是否正确..." required>
+                    </div>
+                    <a id="searchId" class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="searchCodeList()"><i class="fa fa-search"></i>查询</a>
+                </div>
+            </div>
+            <!--TODO branch-->
+            <!--<div class="form-group" hidden="hidden" id="patchTypeId">-->
+                <!--<label class="col-sm-2 control-label is-required">包类型：</label>-->
+                <!--<div class="col-sm-4">-->
+                    <!--&lt;!&ndash;<select id="patchType" name="patchType" class="form-control m-b" th:with="type=${@dict.getType('up_patch_type')}" required onchange="changeTip()">&ndash;&gt;-->
+                    <!--<select id="patchType" name="patchType" class="form-control m-b" th:with="type=${@dict.getType('up_patch_type')}">-->
+                        <!--<option value="">请选择</option>-->
+                        <!--<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>-->
+                    <!--</select>-->
+                <!--</div>-->
+                <!--<label class="col-sm-2 control-label is-required">任务号：</label>-->
+                <!--<div class="col-sm-4">-->
+                    <!--<input name="jiraNo" class="form-control" type="text" required >-->
+                <!--</div>-->
+                <!--<label class="col-sm-2 control-label"></label>-->
+                <!--<div class="col-sm-10">-->
+                    <!--<div id="tip" class="help-block m-b-none" style="color: red" ></div>-->
+                <!--</div>-->
+            <!--</div>-->
+            <div class="form-group">
+                <div id="otherProject">
+                    <label class="col-sm-2 control-label is-required">任务号：</label>
+                    <div class="col-sm-4">
+                        <input id="jiraNo" name="jiraNo" class="form-control" type="text" required >
+                    </div>
+                </div>
+                <label class="col-sm-2 control-label is-required">修改配置：</label>
+                <div class="col-sm-4">
+                    <div class="radio-box">
+                        <input type="radio" id="config-no" name="configFlag" value="N" checked>
+                        <label for="config-no">否</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="radio" id="config-yes" name="configFlag" value="Y">
+                        <label for="config-yes">是</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label is-required">任务名：</label>
+                <div class="col-sm-10">
+                    <textarea id="topic" name="topic" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label is-required">任务类型：</label>
+                <div class="col-sm-4">
+                    <select id="taskType" name="taskType" class="form-control m-b" th:with="type=${@dict.getType('task_type')}" required onchange="hideDemand()">
+                        <option value="">----请选择----</option>-->
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" ></option>
+                    </select>
+                </div>
+                <div id="demandNo" class="form-group">
+                    <label class="col-sm-2 control-label is-required">需求号：</label>
+                    <div class="col-sm-4">
+                        <input name="demandNo" class="form-control" type="text" required style="width: 95%">
+                    </div>
+                </div>
+            </div>
+            <div id="demandName" class="form-group">
+                <label class="col-sm-2 control-label is-required">需求名：</label>
+                <div class="col-sm-10">
+                    <textarea name="demandName" class="form-control" type="text" required rows="2"></textarea>
+                </div>
+            </div>
+
+
+            <div id="branchForm" class="form-group" hidden="hidden">
+                <label class="col-sm-2 control-label is-required">分支ID：</label>
+                <div id="branchNum">
+                    <div class="col-sm-6">
+                        <input id="branchId" name="branchId" class="form-control" type="text" placeholder="合并请求的commitId,多次合并请求，默认最新的一次合并请求" required readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div id="configDiv" class="form-group" style="display: none">
+                <label class="col-sm-2 control-label">修改配置内容：</label>
+                <div class="col-sm-10">
+                    <textarea name="configList" class="form-control" rows="5" placeholder="请输入需要修改的配置文件和修改内容..."></textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">备注：</label>
+                <div class="col-sm-10">
+                    <textarea name="remark" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label is-required">代码列表：</label>
+                <div class="col-sm-10">
+                    <textarea readonly id="codesId" name="realCodeList" class="form-control" rows="10" placeholder="请使用英文逗号分隔代码列表..."></textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label is-required">编译路径：</label>
+                <div class="col-sm-10">
+                    <textarea id="replaceCodesId" name="codeList" class="form-control" rows="10" placeholder="请使用英文逗号分隔代码列表..."></textarea>
+                    <span class="help-block m-b-none" style="color: red">请勿将配置文件输入到代码列表！如需修改配置文件请选择【修改配置】并手动编辑修改内容！</span>
+                </div>
+            </div>
+
+            <div class="form-group" hidden="hidden">
+                <label class="col-sm-2 control-label is-required">删除的代码列表：</label>
+                <div class="col-sm-10">
+                    <textarea readonly id="delete" name="deletePath" class="form-control" rows="10"></textarea>
+                </div>
+            </div>
+
+            <div class="form-group" hidden="hidden">
+                <label class="col-sm-2 control-label is-required">移动的代码列表：</label>
+                <div class="col-sm-10">
+                    <textarea readonly id="move" name="movePath" class="form-control" rows="10"></textarea>
+                </div>
+            </div>
+
+            <div class="form-group" hidden="hidden">
+                <input id="mergeTime" name="mergeTime" class="form-control" type="text" >
+            </div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: jquery-cxselect-js" />
+    <script th:inline="javascript">
+        var prefix = ctx + "upgrade/patch";
+        $("#form-patch-regist").validate({
+            focusCleanup: true
+        });
+
+        $(function() {
+            //判断是否需要隐藏需求号
+            hideDemand ();
+        });
+
+        function hideDemand () {
+            var taskTypeValue = $('#taskType').val();
+            if (taskTypeValue === '1') {
+                $('#demandNo').removeAttr('hidden');
+                $('#demandName').removeAttr('hidden');
+            } else {
+                $('#demandNo').attr('hidden','hidden');
+                $('#demandName').attr('hidden','hidden');
+            }
+        }
+
+        // 产品项目联动
+        var projectAndProduct = [[${projectAndProduct}]];
+        $('#projectProduct').cxSelect({
+            selects: ['type', 'router'],
+            jsonValue: 'v',
+            data: projectAndProduct
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.check(prefix + "/checkRepeatRegist", $('#form-patch-regist').serialize(),function (data) {
+                    if (data.msg && data.msg.length > 0) {
+                        $.modal.confirm(data.msg, function() {
+                            $.operate.save(prefix + "/regist", $('#form-patch-regist').serialize());
+                        });
+                    }else{
+                        $.operate.save(prefix + "/regist", $('#form-patch-regist').serialize());
+                    }
+                });
+            }
+        }
+
+        $("input:radio[name='configFlag']").on('ifChecked', function(event){
+            if (event.currentTarget.defaultValue === "N") {
+                document.getElementById("configDiv").style.display="none";
+            } else {
+                document.getElementById("configDiv").style.display="";
+            }
+        });
+
+        // 选择高唐项目，添加包类型下拉框
+        function onchangeByProject() {
+
+            // 高唐
+            // if (projectId == 1) {
+            //     $('#patchTypeId').removeAttr('hidden');
+            //     $('#otherProject').attr('hidden','hidden');
+            // } else {
+            //     $('#patchTypeId').attr('hidden','hidden');
+            //     $('#otherProject').removeAttr('hidden');
+            //     $('#searchCode').removeAttr('hidden');
+            //     $('#searchId').removeAttr('hidden');
+            // }
+
+            var productId = $.form.selectSelects("projectProduct").split(',')[0];
+            var projectId = $.form.selectSelects("projectProduct").split(',')[1];
+
+            // 选择产品项目，查询打包分支
+            var url = prefix + "/searchPatchBranch";
+            $.ajax({
+                url:url,
+                type:"post",
+                data: "productId=" + productId + "&projectId=" + projectId,
+                success:function(reply){
+                    if (reply == 2) {
+                        $('#branchForm').removeAttr('hidden');
+                    } else {
+                        $('#branchForm').attr('hidden','hidden');
+                    }
+                }
+            });
+        }
+
+
+        // lis项目
+        function onchangeByProduct() {
+            var productId = $('#productId').val();
+            if (productId == 7) {
+                $('#projectId').attr('hidden','hidden');
+                $('#projectLabel').attr('hidden','hidden');
+            } else {
+                $('#projectId').removeAttr('hidden');
+                $('#projectLabel').removeAttr('hidden');
+            }
+        }
+
+        // 根据包类型改变tip
+        function changeTip() {
+            var patchType = $.form.selectSelects("patchType");
+            if (patchType == 2) {
+                $("#tip").text('版本打包需从dev拉分支合并至dev,请确认是否合并.');
+            } else {
+                $("#tip").html('版本包升级中,单任务打包需从master拉分支合并至master,release,dev,请确认是否合并.');
+            }
+        }
+
+        // 查询代码列表填充到文本框中
+        function searchCodeList() {
+            var productId = $.form.selectSelects("projectProduct").split(',')[0];
+            var projectId = $.form.selectSelects("projectProduct").split(',')[1];
+            var commitId = $("#commitId").val();
+            if(commitId == null || commitId == '') {
+                $.modal.msgWarning("提交序号为空");
+                return;
+            }
+
+            if (productId != 7) {
+                if(productId == null || productId == '' && (projectId == null || projectId == '')) {
+                    $.modal.msgWarning("请先选择产品和项目");
+                    return;
+                }
+            }
+
+            var url = prefix + "/searchCode";
+            $.ajax({
+                url:url,
+                type:"post",
+                data: "commitId=" + commitId + "&productId=" + productId + "&projectId=" + projectId,
+                success:function(reply){
+                    if (reply == '' || reply == null) {
+                        $.modal.msgWarning("该提交序号下没有代码列表信息，请重新确认后，再次查询");
+                    } else if(reply.code == 500){
+                        $.modal.confirm(reply.msg);
+                    } else {
+                        let real = reply.data.real;
+                        let replace = reply.data.replace;
+                        $('#codesId').val(real.join(''));
+                        $('#replaceCodesId').val(replace.join(''));
+                        $('#branchId').val(reply.data.commitId);
+
+                        var taskId = reply.data.taskId;
+                        var taskName = reply.data.taskName;
+                        taskId == "null" ? taskId = '' : taskId = taskId;
+                        taskName == "null" ? taskName = '' : taskName = taskName;
+                        $('#jiraNo').val(taskId);
+                        $('#topic').val(taskName);
+                        $('#mergeTime').val(reply.data.mergeTime);
+
+                        // 删除和移动代码列表
+                        let deletePath = reply.data.delete;
+                        let movePath = reply.data.move;
+                        $('#delete').val(deletePath.join(''));
+                        $('#move').val(movePath.join(''));
+                    }
+                }
+            });
+        }
+    </script>
+    <th:block th:include="include :: select2-js"/>
+    <th:block th:include="include :: bootstrap-select-js"/>
+</body>
+</html>

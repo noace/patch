@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('项目应用服务列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>服务名称：</label>
+                                <input type="text" name="serverName"/>
+                            </li>
+                            <li>
+                                <label>项目：</label>
+                                <select name="projectId" th:with="plist=${@upHelper.getProjectList()}">
+                                    <option value="">所有</option>
+                                    <option th:each="project : ${plist}" th:text="${project.projectName}" th:value="${project.projectId}"></option>
+                                </select>
+                            </li>
+                            <li>
+                                <label>产品：</label>
+                                <select name="productId" th:with="plist=${@upHelper.getProductList()}">
+                                    <option value="">所有</option>
+                                    <option th:each="product : ${plist}" th:text="${product.productName}" th:value="${product.productId}"></option>
+                                </select>
+                            </li>
+                            <li>
+                                <label>服务类型：</label>
+                                <select name="serviceType">
+                                    <option value="">所有</option>
+                                    <option value="应用服务">应用服务</option>
+                                    <option value="数据库服务">数据库服务</option>
+                                </select>
+                            </li>
+                            <li>
+                                <label th:style="'width: 100px;'">服务器类型：</label>
+                                <select name="serverType" th:with="plist=${@upHelper.getProductList()}">
+                                    <option value="">所有</option>
+                                    <option value="测试">测试</option>
+                                    <option value="生产">生产</option>
+                                </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="upgrade:projectServer:add">
+                    <i class="fa fa-plus"></i> 添加
+                </a>
+                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="upgrade:projectServer:edit">
+                    <i class="fa fa-edit"></i> 修改
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="upgrade:projectServer:remove">
+                    <i class="fa fa-remove"></i> 删除
+                </a>
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="upgrade:projectServer:export">
+                    <i class="fa fa-download"></i> 导出
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('upgrade:projectServer:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('upgrade:projectServer:remove')}]];
+        var prefix = ctx + "upgrade/projectServer";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "项目应用服务管理",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'serverId',
+                    title: '服务ID',
+                    visible: false
+                },
+                {
+                    field: 'serverName',
+                    title: '服务名称'
+                },
+                {
+                    field: 'serviceType',
+                    title: '服务类型'
+                },
+                {
+                    field: 'serverType',
+                    title: '服务器类型'
+                },
+                {
+                    field: 'projectName',
+                    title: '项目'
+                },
+                {
+                    field: 'productName',
+                    title: '产品'
+                },
+                {
+                    field: 'serverIp',
+                    title: '服务IP'
+                },
+                {
+                    field: 'serverPort',
+                    title: '服务端口号'
+                },
+                {
+                    field: 'serverPath',
+                    title: '服务文件夹路径/数据库连接方式'
+                },
+                {
+                    field: 'tomcatPath',
+                    title: 'Tomcat路径'
+                },
+                {
+                    field: 'deployName',
+                    title: '项目部署名称'
+                },    
+                {
+                    field: 'osType',
+                    title: 'OS类型'
+                },
+                {
+                    field: 'sshPort',
+                    title: 'ssh端口'
+                },
+                {
+                    field: 'sshUser',
+                    title: 'ssh用户名'
+                },
+                {
+                    field: 'updateTime',
+                    title: '更新时间'
+                },
+                {
+                    field: 'remark',
+                    title: '备注',
+                    visible: false
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.serverId + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.serverId + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

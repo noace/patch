@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpgradeDatabaseMapper">
+    
+    <resultMap type="com.kyee.upgrade.domain.UpProjectServer" id="UpProjectServerResult">
+        <result property="serverId"    column="server_id"    />
+        <result property="serverName"    column="server_name"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="productId"    column="product_id"    />
+        <result property="serverIp"    column="server_ip"    />
+        <result property="serverPort"    column="server_port"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="serverPath"    column="server_path"    />
+	    <result property="serverStatus"    column="server_status"    />
+	    <result property="upgradeStatus"    column="upgrade_status"    />
+	    <result property="tomcatPath"    column="tomcat_path"    />
+	    <result property="deployName"    column="deploy_name"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="osType"    column="os_type"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="sshPort"    column="ssh_port"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="sshUser"    column="ssh_user"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="sshPassword"    column="ssh_password"    />
+        <result property="remark"    column="remark"    />
+        <result property="serverType"    column="server_type"    />
+        <result property="serviceType"    column="service_type"    />
+    </resultMap>
+
+    <sql id="selectUpProjectServerVo">
+        select
+            server_id,
+            server_name,
+            project_id,
+            product_id,
+            server_ip,
+            server_port,
+            create_by,
+            server_path,
+            server_status,
+            upgrade_status,
+            tomcat_path,
+            deploy_name,
+            create_time,
+            os_type,
+            update_by,
+            ssh_port,
+            update_time,
+            ssh_user,
+            del_flag,
+            ssh_password,
+            remark,
+            server_type,
+            service_type
+        from
+            up_project_server
+    </sql>
+
+    <select id="getDatabaseInfo" parameterType="com.kyee.upgrade.domain.UpProjectServer" resultMap="UpProjectServerResult">
+        <include refid="selectUpProjectServerVo"/>
+        <where>
+            del_flag != 'Y'
+            and server_id = #{serverId}
+	        and service_type = '数据库服务'
+        </where>
+    </select>
+    
+    <select id="selectUpProjectServerById" parameterType="Integer" resultMap="UpProjectServerResult">
+        <include refid="selectUpProjectServerVo"/>
+        where server_id = #{serverId}
+    </select>
+        
+    <insert id="insertUpProjectServer" parameterType="com.kyee.upgrade.domain.UpProjectServer" useGeneratedKeys="true" keyProperty="serverId">
+        insert into up_project_server
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="serverName != null and serverName != ''">server_name,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="productId != null">product_id,</if>
+            <if test="serverIp != null and serverIp != ''">server_ip,</if>
+            <if test="serverPort != null">server_port,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="serverPath != null and serverPath != ''">server_path,</if>
+	        <if test="serverStatus != null and serverStatus != ''">server_status,</if>
+	        <if test="upgradeStatus != null and upgradeStatus != ''">upgrade_status,</if>
+            <if test="tomcatPath != null and tomcatPath != ''">tomcat_path,</if>
+            <if test="deployName != null and deployName != ''">deploy_name,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="osType != null and osType != ''">os_type,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="sshPort != null">ssh_port,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="sshUser != null and sshUser != ''">ssh_user,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="sshPassword != null and sshPassword != ''">ssh_password,</if>
+            <if test="remark != null">remark,</if>
+            <if test="serverType != null and serverType != '' ">server_type,</if>
+            <if test="serviceType != null and serviceType != '' ">service_type</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="serverName != null and serverName != ''">#{serverName},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="productId != null">#{productId},</if>
+            <if test="serverIp != null and serverIp != ''">#{serverIp},</if>
+            <if test="serverPort != null">#{serverPort},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="serverPath != null and serverPath != ''">#{serverPath},</if>
+            <if test="serverStatus != null and serverStatus != ''">#{serverStatus},</if>
+            <if test="upgradeStatus != null and upgradeStatus != ''">#{upgradeStatus},</if>
+            <if test="tomcatPath != null and tomcatPath != ''">#{tomcatPath},</if>
+            <if test="deployName != null and deployName != ''">#{deployName},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="osType != null and osType != ''">#{osType},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="sshPort != null">#{sshPort},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="sshUser != null and sshUser != ''">#{sshUser},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="sshPassword != null and sshPassword != ''">#{sshPassword},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="serverType != null and serverType != '' ">#{serverType},</if>
+            <if test="serviceType != null and serviceType != '' ">#{serviceType}</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpProjectServer" parameterType="com.kyee.upgrade.domain.UpProjectServer">
+        update up_project_server
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="serverName != null and serverName != ''">server_name = #{serverName},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="productId != null">product_id = #{productId},</if>
+            <if test="serverIp != null and serverIp != ''">server_ip = #{serverIp},</if>
+            <if test="serverPort != null">server_port = #{serverPort},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="serverPath != null and serverPath != ''">server_path = #{serverPath},</if>
+            <if test="serverStatus != null and serverStatus != ''">server_status = #{serverStatus},</if>
+            <if test="upgradeStatus != null and upgradeStatus != ''">upgrade_status = #{upgradeStatus},</if>
+            <if test="tomcatPath != null and tomcatPath != ''">tomcat_path = #{tomcatPath},</if>
+            <if test="deployName != null and deployName != ''">deploy_name = #{deployName},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="osType != null and osType != ''">os_type = #{osType},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="sshPort != null">ssh_port = #{sshPort},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="sshUser != null and sshUser != ''">ssh_user = #{sshUser},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="sshPassword != null and sshPassword != ''">ssh_password = #{sshPassword},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="serverType != null and serverType != '' ">server_type = #{serverType},</if>
+            <if test="serviceType != null and serviceType != '' ">service_type = #{serviceType}</if>
+        </trim>
+        where server_id = #{serverId}
+    </update>
+
+    <delete id="deleteUpProjectServerById" parameterType="Integer">
+        update up_project_server set del_flag = 'Y', update_time=sysdate() where server_id = #{serverId}
+    </delete>
+
+    <delete id="deleteUpProjectServerByIds" parameterType="String">
+        update up_project_server set del_flag = 'Y', update_time=sysdate() where server_id in
+        <foreach item="serverId" collection="array" open="(" separator="," close=")">
+            #{serverId}
+        </foreach>
+    </delete>
+
+    <select id="getDatabaseList" parameterType="com.kyee.upgrade.domain.UpProjectServer" resultMap="UpProjectServerResult">
+        <include refid="selectUpProjectServerVo"/>
+        <where>
+            <if test="serverId != null  and serverId != ''"> and server_id = #{serverId} </if>
+            <if test="serverName != null  and serverName != ''"> and server_name like concat('%', #{serverName}, '%')</if>
+            <if test="serverIp != null  and serverIp != ''"> and server_ip like concat('%', #{serverIp}, '%')</if>
+            <if test="serverPath != null  and serverPath != ''"> and server_path like concat('%', #{serverPath}, '%')</if>
+            <if test="serverStatus != null  and serverStatus != ''"> and server_status = #{serverStatus}</if>
+            <if test="projectId != null "> and project_id = #{projectId}</if>
+            <if test="productId != null "> and product_id = #{productId}</if>
+            <if test="serverType != null and serverType != '' "> and server_type = #{serverType}</if>
+            <if test="serviceType != null and serviceType != '' "> and service_type = #{serviceType}</if>
+            <if test="serverPort != null and serverPort != '' "> and server_port = #{serverPort}</if>
+            and del_flag != 'Y'
+            and service_type = '数据库服务'
+        </where>
+    </select>
+</mapper>

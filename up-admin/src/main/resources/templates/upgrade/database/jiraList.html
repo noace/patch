@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('补丁包JIRA列表')"/>
+    <th:block th:include="include :: select2-css"/>
+    <th:block th:include="include :: bootstrap-select-css"/>
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+    </div>
+</div>
+<div th:include="include :: footer"></div>
+<script th:inline="javascript">
+    var bugfixFlagDatas = [[${@dict.getType('sys_yes_no')}]];
+    var patchId = [[${patchId}]];
+    var taskTypeDatas = [[${@dict.getType('task_type')}]];
+    var prefix = ctx + "upgrade/database";
+    var tempUpgradeUrl = prefix + "/tempUpgrade";
+    $(function () {
+        var options = {
+            url: prefix + "/jiraList",
+            method: "post",
+            onClickCell: onClickCell,
+            queryParams: {
+                patchId: patchId
+            },
+            pagination: false,
+            columns: [
+                {
+                    field: 'patchId',
+                    title: '补丁ID',
+                    visible: false,
+                    sortable: true
+                },
+                {
+                    field: 'productName',
+                    title: '产品',
+                    visible: false
+                },
+                {
+                    field: 'projectName',
+                    title: '项目',
+                    visible: false
+                },
+                {
+                    field: 'jiraNo',
+                    title: '任务号'
+                },
+                {
+                    field: 'topic',
+                    title: '任务名',
+                    width: '250px',
+                    visible: false
+                },
+                {
+                    field: 'demandNo',
+                    title: '需求号',
+
+                },
+                {
+                    field: 'expedited',
+                    title: '加急包',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'taskType',
+                    title: '任务类型',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(taskTypeDatas, value);
+                    }
+                },
+                {
+                    field: 'demandName',
+                    title: '需求名',
+                    visible: false
+                },
+                {
+                    field: 'updateBy',
+                    title: '责任人',
+                },
+                {
+                    field: 'sqlFlag',
+                    title: '含SQL',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'configFlag',
+                    title: '修改配置',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'bugfixFlag',
+                    title: '修复任务',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'bugFlag',
+                    title: '是否BUG',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'buildTime',
+                    title: '编译时间',
+                    sortable: true
+                },
+                {
+                    field: 'codeList',
+                    title: '代码列表',
+                    formatter: function(value, row, index) {
+                        return $.table.tooltip(value, 30, "open");
+                    },
+                    visible: false
+                }
+                ]
+        };
+        $.table.init(options);
+    });
+
+    //配置内容
+    function onClickCell(field, value, row, $element){
+        if (field == "configFlag" && row.configFlag == "Y") {
+            console.log(row);
+            layer.alert(row.configList == null || row.configList == "" ? "配置内容为空" : row.configList, {
+                icon: $.modal.icon(""),
+                title: "配置内容",
+                btn: ['确认'],
+                btnclass: ['btn btn-primary'],
+            });
+        } else if (field == "mergePackageFlag") {
+            table.set();
+            var patchId = row.patchId;
+            var url2 = $.common.isEmpty(patchId) ? table.options.jiraListUrl.replace("{patchId}", "") : table.options.jiraListUrl.replace("{patchId}", patchId);
+            $.modal.open("合并包内容列表", url2);
+        } else if (field == "jiraNo") {
+            var topicValue = row.topic;
+            if (topicValue) {
+                topicValue = topicValue.replace(/\'/g,"&apos;");
+                topicValue = topicValue.replace(/\r/g,"<br>");
+                topicValue = topicValue.replace(/\"/g,"&quot;");
+            }
+            layer.alert(topicValue == null || topicValue == "" ? "任务名为空" : topicValue, {
+                icon: $.modal.icon(""),
+                title: "任务名",
+                btn: ['确认'],
+                btnclass: ['btn btn-primary'],
+            });
+        } else if (field == "demandNo") {
+            var demandNameValue = row.demandName;
+            if (demandNameValue) {
+                demandNameValue = demandNameValue.replace(/\'/g,"&apos;");
+                demandNameValue = demandNameValue.replace(/\r/g,"<br>");
+                demandNameValue = demandNameValue.replace(/\"/g,"&quot;");
+            }
+            layer.alert(demandNameValue == null || demandNameValue == "" ? "需求名为空" : demandNameValue, {
+                icon: $.modal.icon(""),
+                title: "需求名",
+                btn: ['确认'],
+                btnclass: ['btn btn-primary'],
+            });
+        }else if(field == "bugfixFlag" && row.bugfixFlag == "Y"){
+            if(row.bugfixName != null && row.bugfixName != ""){
+                layer.alert(row.bugfixName, {
+                    icon: "",
+                    title: "修复的BUG任务",
+                    btn: ['确认'],
+                    btnclass: ['btn btn-primary'],
+                });
+            }
+        }else if(field == "bugFlag" && row.bugFlag == "Y") {
+            layer.alert(row.repairName != null && row.repairName != ""?row.repairName:"无", {
+                icon: "",
+                title: "修复任务",
+                btn: ['确认'],
+                btnclass: ['btn btn-primary'],
+            });
+        }
+    }
+</script>
+<th:block th:include="include :: select2-js"/>
+<th:block th:include="include :: bootstrap-select-js"/>
+</body>
+</html>

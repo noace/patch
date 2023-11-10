@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('补丁包SQL管理列表')" />
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+    </div>
+</div>
+     <div th:include="include :: footer"></div>
+     <th:block th:include="include :: jquery-cxselect-js" />
+     <script th:inline="javascript">
+        var prefix = ctx + "upgrade/database";
+        var upgradeStatusDatas = [[${@dict.getType('up_upgrade_status')}]];
+        var testStatusDatas = [[${@dict.getType('up_patch_test')}]];
+        var recordStatusDatas = [[${@dict.getType('up_patch_record')}]];
+        var mergeFlagDatas = [[${@dict.getType('sys_yes_no')}]];
+        var bugfixFlagDatas = [[${@dict.getType('sys_yes_no')}]];
+        var taskTypeDatas = [[${@dict.getType('task_type')}]];
+        var productId = [[${productId}]];
+        var projectId = [[${projectId}]];
+        var serverId = [[${serverId}]];
+        var serverType = [[${serverType}]];
+        var columns = '';
+
+        if ("测试" == serverType) {
+            columns = [{
+                checkbox: true
+            },
+                {
+                    field: 'patchId',
+                    title: '补丁ID',
+                    visible: false
+                },
+                {
+                    field: 'productId',
+                    title: '产品Id',
+                    visible: false
+                },
+                {
+                    field: 'productName',
+                    title: '产品'
+                },
+                {
+                    field: 'projectId',
+                    title: '项目Id',
+                    visible: false
+                },
+                {
+                    field: 'projectName',
+                    title: '项目'
+                },
+                {
+                    field: 'expedited',
+                    title: '加急包',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'mergePackageFlag',
+                    title: '是否合包',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(mergeFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'sqlFlag',
+                    title: '含SQL',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    },
+                    visible: false
+                },
+                {
+                    field: 'jiraNo',
+                    title: '任务号'
+                },
+                {
+                    field: 'topic',
+                    title: '任务名',
+                    visible: false
+                },
+                {
+                    field: 'demandNo',
+                    title: '需求号',
+                },
+                {
+                    field: 'taskType',
+                    title: '任务类型',
+                    formatter: function (value) {
+                        return $.table.selectDictLabel(taskTypeDatas, value);
+                    }
+                },
+                {
+                    field: 'demandName',
+                    title: '需求名',
+                    visible: false
+                },
+                {
+                    field: 'upStatus',
+                    title: '执行状态',
+                    formatter: function(value) {
+                        return $.table.selectDictLabel(recordStatusDatas, value);
+                    }
+                },
+                {
+                    field: 'testStatus',
+                    title: '补丁包状态',
+                    formatter: function(value) {
+                        return $.table.selectDictLabel(testStatusDatas, value);
+                    }
+                },
+                {
+                    field: 'configFlag',
+                    title: '修改配置',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'patchFileName',
+                    title: '补丁名称',
+                    formatter: function(value) {
+                        return $.table.tooltip(value, 30, "open");
+                    },
+                    visible: false
+                },
+                {
+                    field: 'codeList',
+                    title: '代码列表',
+                    formatter: function(value) {
+                        return $.table.tooltip(value, 10, "open");
+                    },
+                    visible: false
+                },
+                {
+                    field: 'buildTime',
+                    title: '编译时间',
+                    sortable: true
+                },
+                {
+                    field: 'updateBy',
+                    title: '责任人'
+                },
+                {
+                    field: 'upBy',
+                    title: '上传人'
+                },
+                {
+                    field: 'createTime',
+                    title: '上传时间',
+                    visible: false
+                },
+                {
+                    field: 'remark',
+                    title: '备注',
+                    formatter: function(value) {
+                        return $.table.tooltip(value, 10, "open");
+                    },
+                    visible: true
+                },
+                {
+                    title: '服务操作',
+                    align: 'center',
+                    formatter: function (value, row) {
+                        var actions = [];
+                        if (row.firstPatchFlag) {
+                            actions.push('<a class="btn btn-danger btn-xs" href=" javascript:void(0)" onclick="execute(' +
+                                '\'' + serverId + '\',' +
+                                ' \'' + row.patchId + '\')">' +
+                                '<i class="fa fa-motorcycle"></i>执行</a> ');
+                        } else {
+                            actions.push('<a class="btn disabled btn-danger btn-xs" href=" javascript:void(0)" onclick="execute(' +
+                                '\'' + serverId + '\',' +
+                                ' \'' + row.patchId + '\')">' +
+                                '<i class="fa fa-motorcycle"></i>执行</a> ');
+                        }
+                        return actions.join('');
+                    },
+                    width: 20
+                },
+                {
+                    title: '日志操作',
+                    align: 'center',
+                    formatter: function (value, row) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="getExecuteLog(' +
+                            '\'' + serverId + '\',' +
+                            ' \'' + row.patchId + '\')">' +
+                            '<i class="fa fa-search"></i>查看</a>');
+                        return actions.join('');
+                    },
+                    width: 10
+                },
+                {
+                    title: '修复操作',
+                    align: 'center',
+                    formatter: function (value, row) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-primary btn-xs" href=" javascript:void(0)" onclick="handExecute(' +
+                            '\'' + serverId + '\',' +
+                            ' \'' + row.patchId + '\')">' +
+                            '<i class="fa fa-hand-o-up"></i>手动执行</a> ');
+                        return actions.join('');
+                    },
+                    width: 10
+                }]
+        } else if ('生产' == serverType) {
+            columns = [{
+                checkbox: true
+                },
+                {
+                    field: 'patchId',
+                    title: '补丁ID',
+                    visible: false
+                },
+                {
+                    field: 'productId',
+                    title: '产品Id',
+                    visible: false
+                },
+                {
+                    field: 'productName',
+                    title: '产品'
+                },
+                {
+                    field: 'projectId',
+                    title: '项目Id',
+                    visible: false
+                },
+                {
+                    field: 'projectName',
+                    title: '项目'
+                },
+                {
+                    field: 'expedited',
+                    title: '加急包',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'mergePackageFlag',
+                    title: '是否合包',
+                    sortable: true,
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(mergeFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'sqlFlag',
+                    title: '含SQL',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    },
+                    visible: false
+                },
+                {
+                    field: 'jiraNo',
+                    title: '任务号'
+                },
+                {
+                    field: 'topic',
+                    title: '任务名',
+                    visible: false
+                },
+                {
+                    field: 'demandNo',
+                    title: '需求号',
+                },
+                {
+                    field: 'taskType',
+                    title: '任务类型',
+                    formatter: function (value) {
+                        return $.table.selectDictLabel(taskTypeDatas, value);
+                    }
+                },
+                {
+                    field: 'demandName',
+                    title: '需求名',
+                    visible: false
+                },
+                {
+                    field: 'upStatus',
+                    title: '执行状态',
+                    formatter: function(value) {
+                        return $.table.selectDictLabel(recordStatusDatas, value);
+                    }
+                },
+                {
+                    field: 'patchStatus',
+                    title: '补丁包状态',
+                    formatter: function(value) {
+                        return $.table.selectDictLabel(upgradeStatusDatas, value);
+                    }
+                },
+                {
+                    field: 'configFlag',
+                    title: '修改配置',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(bugfixFlagDatas, value);
+                    }
+                },
+                {
+                    field: 'patchFileName',
+                    title: '补丁名称',
+                    formatter: function(value) {
+                        return $.table.tooltip(value, 30, "open");
+                    },
+                    visible: false
+                },
+                {
+                    field: 'codeList',
+                    title: '代码列表',
+                    formatter: function(value) {
+                        return $.table.tooltip(value, 10, "open");
+                    },
+                    visible: false
+                },
+                {
+                    field: 'buildTime',
+                    title: '编译时间',
+                    sortable: true
+                },
+                {
+                    field: 'updateBy',
+                    title: '责任人'
+                },
+                {
+                    field: 'upBy',
+                    title: '上传人'
+                },
+                {
+                    field: 'createTime',
+                    title: '上传时间',
+                    visible: false
+                },
+                {
+                    field: 'remark',
+                    title: '备注',
+                    formatter: function(value) {
+                        return $.table.tooltip(value, 10, "open");
+                    },
+                    visible: true
+                },
+                {
+                    title: '服务操作',
+                    align: 'center',
+                    formatter: function (value, row) {
+                        var actions = [];
+                        if (row.firstPatchFlag) {
+                            actions.push('<a class="btn btn-danger btn-xs" href=" javascript:void(0)" onclick="execute(' +
+                                '\'' + serverId + '\',' +
+                                ' \'' + row.patchId + '\')">' +
+                                '<i class="fa fa-motorcycle"></i>执行</a> ');
+                        } else {
+                            actions.push('<a class="btn disabled btn-danger btn-xs" href=" javascript:void(0)" onclick="execute(' +
+                                '\'' + serverId + '\',' +
+                                ' \'' + row.patchId + '\')">' +
+                                '<i class="fa fa-motorcycle"></i>执行</a> ');
+                        }
+                        return actions.join('');
+                    },
+                    width: 20
+                },
+                {
+                    title: '日志操作',
+                    align: 'center',
+                    formatter: function (value, row) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="getExecuteLog(' +
+                            '\'' + serverId + '\',' +
+                            ' \'' + row.patchId + '\')">' +
+                            '<i class="fa fa-search"></i>查看</a>');
+                        return actions.join('');
+                    },
+                    width: 10
+                },
+                {
+                    title: '修复操作',
+                    align: 'center',
+                    formatter: function (value, row) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-primary btn-xs" href=" javascript:void(0)" onclick="handExecute(' +
+                            '\'' + serverId + '\',' +
+                            ' \'' + row.patchId + '\')">' +
+                            '<i class="fa fa-hand-o-up"></i>手动执行</a> ');
+                        return actions.join('');
+                    },
+                    width: 10
+                }
+            ]
+        }
+        $(function() {
+            var options = {
+                url: prefix + "/sqlPatch/list",
+                upgrade: prefix + "/upgrade",
+                modalName: "补丁包SQL管理",
+                pagination: false,
+                jiraListUrl: prefix+ "/jiraList/"+true+"/{patchId}",
+                executeUrl: prefix + "/execute",
+                getExecuteLogUrl: prefix + "/getExecuteLog/{patchId}/{serverId}", // 查看升级日志
+                handExecuteUrl: prefix + "/handExecute", // 手动升级
+                queryParams: {
+                    productId: productId,
+                    projectId: projectId,
+                    serverId: serverId
+                },
+                onClickCell: onClickCell,
+                columns: columns
+            };
+            $.table.init(options);
+        });
+
+        // 执行SQL
+        function execute(serverId, patchId) {
+            table.set();
+            debugger;
+            var executeUrl = table.options.executeUrl;
+            $.modal.confirm("是否执行此补丁包SQL!", function() {
+                var data = {"patchId": patchId, "serverId": serverId};
+                $.operate.submit(executeUrl, "post", "json", data);
+            });
+        }
+
+        // 查看执行日志
+        function getExecuteLog(serverId, patchId) {
+            table.set();
+            debugger;
+            var patchIdUrl = $.common.isEmpty(patchId) ? table.options.getExecuteLogUrl.replace("{patchId}", "") : table.options.getExecuteLogUrl.replace("{patchId}", patchId);
+            var url = $.common.isEmpty(serverId) ? patchIdUrl.replace("{serverId}", "") : patchIdUrl.replace("{serverId}", serverId);
+            $.modal.open("执行数据库日志", url, 1000);
+        }
+
+        // 手动执行
+        function handExecute(serverId, patchId) {
+            table.set();
+            var handExecuteUrl = table.options.handExecuteUrl;
+            $.modal.confirm("是否同步执行记录!", function() {
+                var data = {"patchId": patchId, "serverId": serverId};
+                $.operate.submit(handExecuteUrl, "post", "json", data);
+            });
+        }
+
+        //列单击
+        function onClickCell(field, value, row, $element){
+            if (field == "configFlag" && row.configFlag == "Y") {
+                layer.alert(row.configList == null || row.configList == "" ? "配置内容为空" : row.configList, {
+                    icon: $.modal.icon(""),
+                    title: "配置内容",
+                    btn: ['确认'],
+                    btnclass: ['btn btn-primary'],
+                });
+            } else if (field == "mergePackageFlag" && row.mergePackageFlag == "Y") {
+                table.set();
+                var patchId = row.patchId;
+                var url2 = $.common.isEmpty(patchId) ? table.options.jiraListUrl.replace("{patchId}", "") : table.options.jiraListUrl.replace("{patchId}", patchId);
+                $.modal.open("合并包内容列表", url2, 900);
+            } else if (field == "jiraNo") {
+                var topicValue = row.topic;
+                if (topicValue) {
+                    topicValue = topicValue.replace(/\'/g,"&apos;");
+                    topicValue = topicValue.replace(/\r/g,"<br>");
+                    topicValue = topicValue.replace(/\"/g,"&quot;");
+                }
+                layer.alert(topicValue == null || topicValue == "" ? "任务名为空" : topicValue, {
+                    icon: $.modal.icon(""),
+                    title: "任务名",
+                    btn: ['确认'],
+                    btnclass: ['btn btn-primary'],
+                });
+            } else if (field == "demandNo") {
+                var demandNameValue = row.demandName;
+                if (demandNameValue) {
+                    demandNameValue = demandNameValue.replace(/\'/g,"&apos;");
+                    demandNameValue = demandNameValue.replace(/\r/g,"<br>");
+                    demandNameValue = demandNameValue.replace(/\"/g,"&quot;");
+                }
+                layer.alert(demandNameValue == null || demandNameValue == "" ? "需求名为空" : demandNameValue, {
+                    icon: $.modal.icon(""),
+                    title: "需求名",
+                    btn: ['确认'],
+                    btnclass: ['btn btn-primary'],
+                });
+            }else if(field == "bugfixFlag" && row.bugfixFlag == "Y"){
+                if(row.bugfixName != null && row.bugfixName != ""){
+                    layer.alert(row.bugfixName, {
+                        icon: "",
+                        title: "修复的BUG任务",
+                        btn: ['确认'],
+                        btnclass: ['btn btn-primary'],
+                    });
+                }
+            }else if(field == "bugFlag" && row.bugFlag == "Y") {
+                layer.alert(row.repairName != null && row.repairName != ""?row.repairName:"无", {
+                    icon: "",
+                    title: "修复任务",
+                    btn: ['确认'],
+                    btnclass: ['btn btn-primary'],
+                });
+            }
+        }
+    </script>
+</body>
+</html>

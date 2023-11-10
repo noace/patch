@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('升级日志')" />
+    <th:block th:include="include :: select2-css"/>
+    <th:block th:include="include :: bootstrap-select-css"/>
+</head>
+<body class="white-bg">
+<div class="container-div">
+    <!--<button class="btn btn-default btn-outline" style="float:right;margin-right: 10px" type="button"-->
+            <!--name="refresh" aria-label="刷新" title="刷新"  onclick="javascript:location.reload()">-->
+        <!--<i class="glyphicon glyphicon-refresh icon-refresh"></i>-->
+    <!--</button>-->
+    <!--<div class="row">-->
+        <!--<div class="ibox float-e-margins">-->
+            <!--<div class="ibox-content no-padding">-->
+                <table>
+                    <tr th:each="log : ${logs}">
+                        <td th:if="${log.logContent != null}" th:text="${log.logContent}"></td>
+                        <td th:if="${log.logContent == null}" th:text="无"></td>
+                    </tr>
+                </table>
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+</div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: jquery-cxselect-js" />
+    <th:block th:include="include :: select2-js"/>
+    <th:block th:include="include :: bootstrap-select-js"/>
+</body>
+</html>

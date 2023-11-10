@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpBuildCodeChangesMapper">
+    
+    <resultMap type="UpBuildCodeChanges" id="UpBuildCodeChangesResult">
+        <result property="codeChangeId"    column="code_change_id"    />
+        <result property="patchId"    column="patch_id"    />
+        <result property="commitId"    column="commit_id"    />
+        <result property="commitTime"    column="commit_time"    />
+        <result property="commitPerson"    column="commit_person"    />
+        <result property="commitMessage"    column="commit_message"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="codePath"    column="code_path"    />
+        <result property="remark"    column="remark"    />
+        <result property="changeType"    column="change_type"    />
+    </resultMap>
+
+    <sql id="selectUpBuildCodeChangesVo">
+        select code_change_id, patch_id, commit_id, commit_time, commit_person, commit_message, del_flag, code_path, remark, change_type from up_build_code_changes
+    </sql>
+
+    <select id="selectUpBuildCodeChangesList" parameterType="UpBuildCodeChanges" resultMap="UpBuildCodeChangesResult">
+        <include refid="selectUpBuildCodeChangesVo"/>
+        <where>  
+            <if test="codeChangeId != null "> and code_change_id = #{codeChangeId}</if>
+            <if test="commitId != null  and commitId != ''"> and commit_id = #{commitId}</if>
+            <if test="commitTime != null "> and commit_time = #{commitTime}</if>
+            <if test="commitPerson != null  and commitPerson != ''"> and commit_person = #{commitPerson}</if>
+            <if test="commitMessage != null  and commitMessage != ''"> and commit_message = #{commitMessage}</if>
+            <if test="delFlag != null  and delFlag != ''"> and del_flag = #{delFlag}</if>
+            <if test="codePath != null  and codePath != ''"> and code_path = #{codePath}</if>
+            <if test="remark != null  and remark != ''"> and remark = #{remark}</if>
+            <if test="changeType != null  and changeType != ''"> and change_type = #{changeType}</if>
+        </where>
+    </select>
+    
+    <select id="selectUpBuildCodeChangesById" parameterType="Long" resultMap="UpBuildCodeChangesResult">
+        <include refid="selectUpBuildCodeChangesVo"/>
+        where code_change_id = #{codeChangeId}
+    </select>
+        
+    <insert id="insertUpBuildCodeChanges" parameterType="UpBuildCodeChanges" useGeneratedKeys="true" keyProperty="codeChangeId">
+        insert into up_build_code_changes
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="patchId != null and patchId != ''">patch_id,</if>
+            <if test="commitId != null and commitId != ''">commit_id,</if>
+            <if test="commitTime != null">commit_time,</if>
+            <if test="commitPerson != null and commitPerson != ''">commit_person,</if>
+            <if test="commitMessage != null and commitMessage != ''">commit_message,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+            <if test="codePath != null and codePath != ''">code_path,</if>
+            <if test="remark != null">remark,</if>
+            <if test="changeType != null and changeType != ''">change_type,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="patchId != null and patchId != ''">#{patchId},</if>
+            <if test="commitId != null and commitId != ''">#{commitId},</if>
+            <if test="commitTime != null">#{commitTime},</if>
+            <if test="commitPerson != null and commitPerson != ''">#{commitPerson},</if>
+            <if test="commitMessage != null and commitMessage != ''">#{commitMessage},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+            <if test="codePath != null and codePath != ''">#{codePath},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="changeType != null and changeType != ''">#{changeType},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpBuildCodeChanges" parameterType="UpBuildCodeChanges">
+        update up_build_code_changes
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="patchId != null and patchId != ''">patch_id = #{patchId},</if>
+            <if test="commitId != null and commitId != ''">commit_id = #{commitId},</if>
+            <if test="commitTime != null">commit_time = #{commitTime},</if>
+            <if test="commitPerson != null and commitPerson != ''">commit_person = #{commitPerson},</if>
+            <if test="commitMessage != null and commitMessage != ''">commit_message = #{commitMessage},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="codePath != null and codePath != ''">code_path = #{codePath},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="changeType != null and changeType != ''">change_type = #{changeType},</if>
+        </trim>
+        where code_change_id = #{codeChangeId}
+    </update>
+
+    <delete id="deleteUpBuildCodeChangesById" parameterType="Long">
+        update up_build_code_changes set del_flag = 'Y', update_time=sysdate() where code_change_id = #{codeChangeId}
+    </delete>
+
+    <delete id="deleteUpBuildCodeChangesByIds" parameterType="String">
+        update up_build_code_changes set del_flag = 'Y', update_time=sysdate() where code_change_id in
+        <foreach item="codeChangeId" collection="array" open="(" separator="," close=")">
+            #{codeChangeId}
+        </foreach>
+    </delete>
+
+    <insert id="batchInsertUpBuildCodeChanges" parameterType="com.kyee.upgrade.domain.UpBuildCodeChanges">
+        INSERT INTO
+            up_build_code_changes(
+                code_change_id,
+                patch_id,
+                commit_id,
+                commit_time,
+                commit_person,
+                commit_message,
+                del_flag,
+                code_path,
+                remark,
+                change_type
+                )
+        VALUES
+        <foreach collection="codeChangesList" separator="," item="codeChange">
+            (   #{codeChange.codeChangeId, jdbcType=BIGINT},
+                #{codeChange.patchId, jdbcType=BIGINT},
+                #{codeChange.commitId, jdbcType=VARCHAR},
+                #{codeChange.commitTime, jdbcType=TIMESTAMP},
+                #{codeChange.commitPerson, jdbcType=VARCHAR},
+                #{codeChange.commitMessage, jdbcType=VARCHAR},
+                #{codeChange.delFlag, jdbcType=VARCHAR},
+                #{codeChange.codePath, jdbcType=VARCHAR},
+                #{codeChange.remark, jdbcType=VARCHAR},
+                #{codeChange.changeType, jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+
+</mapper>

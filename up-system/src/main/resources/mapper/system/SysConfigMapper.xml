@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysConfigMapper">
+    
+    <resultMap type="SysConfig" id="SysConfigResult">
+    	<id     property="configId"      column="config_id"      />
+        <result property="configName"    column="config_name"    />
+        <result property="configKey"     column="config_key"     />
+        <result property="configValue"   column="config_value"   />
+        <result property="configType"    column="config_type"    />
+        <result property="createBy"      column="create_by"      />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"      column="update_by"      />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+    
+    <sql id="selectConfigVo">
+        select config_id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark 
+		from sys_config
+    </sql>
+    
+    <!-- 查询条件 -->
+	<sql id="sqlwhereSearch">
+		<where>
+			<if test="configId !=null">
+				and config_id = #{configId}
+			</if>
+			<if test="configKey !=null and configKey != ''">
+				and config_key = #{configKey}
+			</if>
+		</where>
+	</sql>
+    
+    <select id="selectConfig" parameterType="SysConfig" resultMap="SysConfigResult">
+        <include refid="selectConfigVo"/>
+        <include refid="sqlwhereSearch"/>
+    </select>
+    
+    <select id="selectConfigList" parameterType="SysConfig" resultMap="SysConfigResult">
+        <include refid="selectConfigVo"/>
+        <where>
+			<if test="configName != null and configName != ''">
+				AND config_name like concat('%', #{configName}, '%')
+			</if>
+			<if test="configType != null and configType != ''">
+				AND config_type = #{configType}
+			</if>
+			<if test="configKey != null and configKey != ''">
+				AND config_key like concat('%', #{configKey}, '%')
+			</if>
+			<if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+				and date_format(create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+			</if>
+			<if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+				and date_format(create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+			</if>
+		</where>
+    </select>
+    
+    <select id="checkConfigKeyUnique" parameterType="String" resultMap="SysConfigResult">
+        <include refid="selectConfigVo"/>
+        where config_key = #{configKey} limit 1
+    </select>
+    
+    <insert id="insertConfig" parameterType="SysConfig">
+        insert into sys_config (
+			<if test="configName != null and configName != '' ">config_name,</if>
+			<if test="configKey != null and configKey != '' ">config_key,</if>
+			<if test="configValue != null and configValue != '' ">config_value,</if>
+			<if test="configType != null and configType != '' ">config_type,</if>
+			<if test="createBy != null and createBy != ''">create_by,</if>
+			<if test="remark != null and remark != ''">remark,</if>
+ 			create_time
+        )values(
+			<if test="configName != null and configName != ''">#{configName},</if>
+			<if test="configKey != null and configKey != ''">#{configKey},</if>
+			<if test="configValue != null and configValue != ''">#{configValue},</if>
+			<if test="configType != null and configType != ''">#{configType},</if>
+			<if test="createBy != null and createBy != ''">#{createBy},</if>
+			<if test="remark != null and remark != ''">#{remark},</if>
+ 			sysdate()
+		)
+    </insert>
+	 
+    <update id="updateConfig" parameterType="SysConfig">
+        update sys_config 
+        <set>
+            <if test="configName != null and configName != ''">config_name = #{configName},</if>
+            <if test="configKey != null and configKey != ''">config_key = #{configKey},</if>
+            <if test="configValue != null and configValue != ''">config_value = #{configValue},</if>
+            <if test="configType != null and configType != ''">config_type = #{configType},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+ 			update_time = sysdate()
+        </set>
+        where config_id = #{configId}
+    </update>
+	
+	<delete id="deleteConfigById" parameterType="Long">
+		delete from sys_config where config_id = #{configId}
+	</delete>
+	
+    <delete id="deleteConfigByIds" parameterType="String">
+        delete from sys_config where config_id in 
+        <foreach item="configId" collection="array" open="(" separator="," close=")">
+        	#{configId}
+        </foreach>
+    </delete>
+
+
+    <select id="selectPublish" resultType="integer" parameterType="String">
+        SELECT count(1)  FROM up_patch
+        <where>
+            <choose>
+                <when test="temp == '当日'">
+                    and update_time BETWEEN CONCAT(CURDATE(),' 00:00:00') AND CONCAT(CURDATE(),' 23:59:59')
+                </when>
+                <when test="temp == '当日-1'">
+                    and TO_DAYS(NOW()) - TO_DAYS(update_time) <![CDATA[ <= ]]> 1
+                </when>
+                <when test="temp == '本月'">
+                    and DATE_FORMAT(update_time,'%Y-%m') = DATE_FORMAT(NOW(),'%Y-%m')
+                </when>
+                <when test="temp == '本月-1'">
+                    and PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(update_time,'%Y%m') =1)
+                </when>
+                <when test="temp == '全年'">
+                    and date_format(update_time,'%y')=date_format(curdate(),'%y')
+                </when>
+                <when test="temp == '全年-1'">
+                    and year(update_time)=year(date_sub(now(),interval 1 year))
+                </when>
+                <when test="temp == '近一月'">
+                    and TO_DAYS(now()) - TO_DAYS(update_time) <![CDATA[ <= ]]> 30
+                </when>
+            </choose>
+            and del_flag != 'Y' and patch_status in('15','70')
+        </where>
+    </select>
+
+    <select id="selectUpgrades" resultType="integer" parameterType="String">
+        SELECT count(1)  FROM up_patch_client
+        <where>
+            <choose>
+                <when test="temp == '当日'">
+                    and update_time BETWEEN CONCAT(CURDATE(),' 00:00:00') AND CONCAT(CURDATE(),' 23:59:59')
+                </when>
+                <when test="temp == '当日-1'">
+                    and TO_DAYS( NOW() ) - TO_DAYS(update_time) <![CDATA[ <= ]]> 1
+                </when>
+                <when test="temp == '本月'">
+                    and DATE_FORMAT(update_time,'%Y-%m') = DATE_FORMAT(NOW(),'%Y-%m')
+                </when>
+                <when test="temp == '本月-1'">
+                    and PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(update_time,'%Y%m') =1)
+                </when>
+                <when test="temp == '全年'">
+                    and date_format(update_time,'%y')=date_format(curdate(),'%y')
+                </when>
+                <when test="temp == '全年-1'">
+                    and year(update_time)=year(date_sub(now(),interval 1 year))
+                </when>
+                <when test="temp == '近一月'">
+                    and TO_DAYS(now()) - TO_DAYS(update_time) <![CDATA[ <= ]]> 30
+                </when>
+
+            </choose>
+            and patch_status in('20') and del_flag != 'Y'
+        </where>
+    </select>
+
+    <select id="selectfailnum" resultType="integer" parameterType="String">
+        SELECT count(1)  FROM up_patch_client
+        <where>
+            <choose>
+                <when test="temp == '当日'">
+                    and update_time BETWEEN CONCAT(CURDATE(),' 00:00:00') AND CONCAT(CURDATE(),' 23:59:59')
+                </when>
+                <when test="temp == '当日-1'">
+                    and TO_DAYS( NOW() ) - TO_DAYS(update_time) <![CDATA[ <= ]]> 1
+                </when>
+                <when test="temp == '本月'">
+                    and DATE_FORMAT(update_time,'%Y-%m') = DATE_FORMAT(NOW(),'%Y-%m')
+                </when>
+                <when test="temp == '本月-1'">
+                    and PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(update_time,'%Y%m') =1)
+                </when>
+                <when test="temp == '全年'">
+                    and date_format(update_time,'%y')=date_format(curdate(),'%y')
+                </when>
+                <when test="temp == '全年-1'">
+                    and year(update_time)=year(date_sub(now(),interval 1 year))
+                </when>
+            </choose>
+            and  patch_status in('50','60','80') and del_flag != 'Y'
+        </where>
+    </select>
+
+    <select id="selectActiveUser" resultType="integer">
+       select count(distinct create_by)  from  up_patch
+       <where>
+            <choose>
+                <when test="temp == '近一月'">
+                   and DATE_SUB(CURDATE(), INTERVAL 30 DAY) <![CDATA[ <= ]]> date(update_time)
+                </when>
+                <when test="temp == '近一月-1'">
+                    and DATE_SUB(CURDATE(), INTERVAL 60 DAY) <![CDATA[ <= ]]> date(update_time)
+                    and DATE_SUB(CURDATE(), INTERVAL 30 DAY) <![CDATA[ > ]]> date(update_time)
+                </when>
+           </choose>
+       </where>
+    </select>
+
+    <select id="selectOneMonthUpPatchClientList" resultType="map">
+        select patch_id, project_id, project_Name, create_time, update_time from up_patch_client
+        <where>
+            and DATE_SUB(CURDATE(), INTERVAL 30 DAY) <![CDATA[ <= ]]> date(update_time)
+            and patch_status in('80')
+            and del_flag != 'Y'
+        </where>
+        order by update_time desc
+    </select>
+
+    <select id="selectOneMonthUpPatchList" resultType="map">
+        SELECT
+        patch_id,
+        p.project_id,
+        pj.project_name,
+        p.create_time,
+        p.update_time
+        FROM
+        up_patch p
+        INNER JOIN up_project pj ON p.project_id = pj.project_id and pj.del_flag = 'N'
+        INNER JOIN up_product pd ON p.product_id = pd.product_id and pd.del_flag = 'N'
+        <where>
+            and p.del_flag != 'Y'
+            and DATE_SUB(CURDATE(), INTERVAL 30 DAY) <![CDATA[ <= ]]> date(p.update_time)
+            and p.patch_status in('15','70')
+        </where>
+        order by p.update_time asc
+    </select>
+
+    <select id="selectUpPatchData" resultType="map">
+        select
+            DATE_FORMAT(upt.update_time,'%Y-%m-%d')   as timestamp,
+            DATE_FORMAT(upt.update_time,'%d') as day,
+            CONCAT(DATE_FORMAT(upt.update_time,'%m'),'月',DATE_FORMAT(upt.update_time,'%d')) as time,
+            (select count(1) from up_patch up where DATE_FORMAT(up.update_time,'%Y-%m-%d') = timestamp
+            and up.del_flag != 'Y' and up.patch_status in ('15')
+            )+
+            (select count(1) from up_patch_client up where DATE_FORMAT(up.build_time,'%Y-%m-%d') = timestamp
+            and up.del_flag != 'Y' and up.patch_status  in ('20')
+            )
+            as count
+        from up_patch upt
+        where  DATE_SUB(CURDATE(), INTERVAL 6 DAY) <![CDATA[ <= ]]>  date(update_time)
+        and upt.del_flag != 'Y'
+        and upt.patch_status in('15')
+        group by timestamp
+        order by timestamp
+    </select>
+
+    <select id="selectUpPatchClientData" resultType="map">
+        select
+        DATE_FORMAT(upt.update_time,'%Y-%m-%d')   as timestamp,
+        DATE_FORMAT(upt.update_time,'%d') as day,
+        CONCAT(DATE_FORMAT(upt.update_time,'%m'),'月',DATE_FORMAT(upt.update_time,'%d')) as time,
+        (select count(1) from up_patch_client up where DATE_FORMAT(up.update_time,'%Y-%m-%d') = timestamp
+        and up.del_flag != 'Y'
+        and up.patch_status in('20')
+        ) as count
+        from up_patch_client upt
+        where  DATE_SUB(CURDATE(), INTERVAL 6 DAY) <![CDATA[ <= ]]> date(update_time)
+        and upt.del_flag != 'Y'
+        and upt.patch_status in('20')
+        group by timestamp
+        order by timestamp
+    </select>
+</mapper>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpProjectModuleMapper">
+    
+    <resultMap type="UpProjectModule" id="UpProjectModuleResult">
+        <result property="projectProductId"    column="project_product_id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="productId"    column="product_id"    />
+        <result property="moduleName"    column="module_name"    />
+        <result property="jarVersion"    column="jar_version"    />
+        <result property="packageType"    column="package_type"    />
+        <result property="rank"    column="rank"    />
+        <result property="baseModule"    column="base_module"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectUpProjectModuleVo">
+        select project_product_id, project_id, product_id, module_name, jar_version, package_type, rank, base_module, create_by, create_time, update_by, update_time, del_flag, remark from up_project_module
+    </sql>
+
+    <select id="selectUpProjectModuleList" parameterType="UpProjectModule" resultMap="UpProjectModuleResult">
+        <include refid="selectUpProjectModuleVo"/>
+        <where>  
+            <if test="projectId != null "> and project_id = #{projectId}</if>
+            <if test="productId != null "> and product_id = #{productId}</if>
+            <if test="moduleName != null  and moduleName != ''"> and module_name like concat('%', #{moduleName}, '%')</if>
+            <if test="jarVersion != null  and jarVersion != ''"> and jar_version like concat('%', #{jarVersion}, '%')</if>
+            <if test="packageType != null  and packageType != ''"> and package_type like concat('%', #{packageType}, '%')</if>
+            and del_flag = 'N'
+        </where>
+        order by rank asc
+    </select>
+
+    <select id="getModuleList" parameterType="UpProjectModule" resultMap="UpProjectModuleResult">
+        <include refid="selectUpProjectModuleVo"/>
+        <where>
+            <if test="productId != null "> and product_id = #{productId}</if>
+            <if test="projectId != null "> and project_id = #{projectId}</if>
+            <if test="moduleName != null  and moduleName != ''"> and module_name like concat('%', #{moduleName}, '%')</if>
+            <if test="jarVersion != null  and jarVersion != ''"> and jar_version like concat('%', #{jarVersion}, '%')</if>
+            <if test="packageType != null  and packageType != ''"> and package_type like concat('%', #{packageType}, '%')</if>
+            and del_flag = 'N'
+        </where>
+        order by rank asc
+    </select>
+    
+    <select id="selectUpProjectModuleById" parameterType="Integer" resultMap="UpProjectModuleResult">
+        <include refid="selectUpProjectModuleVo"/>
+        where project_product_id = #{projectProductId}
+    </select>
+        
+    <insert id="insertUpProjectModule" parameterType="UpProjectModule" useGeneratedKeys="true" keyProperty="projectProductId">
+        insert into up_project_module
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">project_id,</if>
+            <if test="productId != null">product_id,</if>
+            <if test="moduleName != null">module_name,</if>
+            <if test="jarVersion != null">jar_version,</if>
+            <if test="packageType != null">package_type,</if>
+            <if test="rank != null">rank,</if>
+            <if test="baseModule != null">base_module,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">#{projectId},</if>
+            <if test="productId != null">#{productId},</if>
+            <if test="moduleName != null">#{moduleName},</if>
+            <if test="jarVersion !=  null">#{jarVersion},</if>
+            <if test="packageType !=  null">#{packageType},</if>
+            <if test="rank !=  null">#{rank},</if>
+            <if test="baseModule !=  null">#{baseModule},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpProjectModule" parameterType="UpProjectModule">
+        update up_project_module
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="productId != null">product_id = #{productId},</if>
+            <if test="moduleName != null">module_name = #{moduleName},</if>
+            <if test="jarVersion != null">jar_version = #{jarVersion},</if>
+            <if test="packageType != null">package_type = #{packageType},</if>
+            <if test="rank != null">rank = #{rank},</if>
+            <if test="baseModule != null">base_module = #{baseModule},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where project_product_id = #{projectProductId}
+    </update>
+
+    <delete id="deleteUpProjectModuleById" parameterType="Integer">
+        update up_project_module set del_flag = 'Y', update_time=sysdate() where project_product_id = #{projectProductId}
+    </delete>
+
+    <delete id="deleteUpProjectModuleByIds" parameterType="String">
+        update up_project_module set del_flag = 'Y', update_time=sysdate() where project_product_id in
+        <foreach item="projectProductId" collection="array" open="(" separator="," close=")">
+            #{projectProductId}
+        </foreach>
+    </delete>
+
+    <select id="selectConfigByProductIdAndProjectId" parameterType="UpProjectModule" resultMap="UpProjectModuleResult">
+        <include refid="selectUpProjectModuleVo"/>
+        <where>
+            del_flag != 'Y'
+            <if test="productId != null "> and product_id = #{productId, jdbcType=BIGINT}</if>
+            <if test="moduleName != null "> and module_name = #{moduleName, jdbcType=VARCHAR}</if>
+            <if test="jarVersion != null "> and jar_version = #{jarVersion, jdbcType=VARCHAR}</if>
+            <if test="packageType != null "> and package_type = #{packageType, jdbcType=VARCHAR}</if>
+            <if test="rank != null "> and rank = #{rank, jdbcType=VARCHAR}</if>
+        </where>
+    </select>
+
+</mapper>

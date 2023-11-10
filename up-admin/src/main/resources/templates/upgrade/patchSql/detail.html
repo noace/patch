@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('详细sql')" />
+	<th:block th:include="include :: jsonview-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+	<form class="form-horizontal m-t" id="operlogForm">
+		<div class="form-group">
+			<div class="form-control-static"><pre id="sqltext" style="min-height: 500px"></pre></div>
+		</div>
+	</form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: jsonview-js" />
+    <script th:inline="javascript">
+	    $(function() {
+	    	var sqltext = [[${resultData.sqltext}]];
+	    	$("#sqltext").text(sqltext != null && sqltext != ""?sqltext:"未找到sql详细");
+
+	    });
+    </script>
+</body>
+</html>

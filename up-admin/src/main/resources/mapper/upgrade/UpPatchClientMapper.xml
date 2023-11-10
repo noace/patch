@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyee.upgrade.mapper.UpPatchClientMapper">
+    
+    <resultMap type="com.kyee.upgrade.domain.UpPatchClient" id="UpPatchClientResult">
+        <result property="patchId"    column="patch_id"    />
+	    <result property="productId"    column="product_id"    />
+        <result property="productName"    column="product_name"    />
+	    <result property="projectId"    column="project_id"    />
+        <result property="projectName"    column="project_Name"    />
+        <result property="patchFileName"    column="patch_file_name"    />
+        <result property="patchFileUrl"    column="patch_file_url"    />
+        <result property="sqlFlag"    column="sql_flag"    />
+        <result property="upBy"    column="up_by"    />
+        <result property="buildTime"    column="build_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+        <result property="patchStatus"    column="patch_status"    />
+        <result property="mergePackageFlag"    column="merge_package_flag"    />
+        <result property="configFlag"    column="config_flag"    />
+        <result property="configList"    column="config_list"    />
+        <result property="jiraNo"    column="jira_no"/>
+        <result property="topic"    column="topic"/>
+        <result property="codeList"    column="code_list"    />
+        <result property="realCodeList"    column="real_code_list"    />
+        <result property="compileList"    column="compile_list"    />
+        <result property="patchType"    column="patch_type"    />
+        <result property="autoUpgradeFlag"    column="auto_upgrade_flag"    />
+        <result property="expedited"    column="expedited"    />
+        <result property="taskType"    column="task_type"    />
+        <result property="demandNo"    column="demand_no"    />
+        <result property="demandName"    column="demand_name"    />
+        <result property="bugFlag"    column="bug_flag"    />
+        <result property="bugfixFlag"    column="bugfix_flag"    />
+        <result property="bugfixPatch"    column="bugfix_patch"    />
+        <result property="testStatus"    column="test_status"    />
+    </resultMap>
+	
+	<resultMap type="com.kyee.upgrade.domain.vo.UpPatchClientExtend" id="UpPatchClientExtend">
+		<result property="patchId"    column="patch_id"    />
+		<result property="productId"    column="product_id"    />
+		<result property="productName"    column="product_name"    />
+		<result property="projectId"    column="project_id"    />
+		<result property="projectName"    column="project_Name"    />
+		<result property="patchFileName"    column="patch_file_name"    />
+		<result property="patchFileUrl"    column="patch_file_url"    />
+		<result property="sqlFlag"    column="sql_flag"    />
+		<result property="upBy"    column="up_by"    />
+		<result property="buildTime"    column="build_time"    />
+		<result property="createBy"    column="create_by"    />
+		<result property="createTime"    column="create_time"    />
+		<result property="updateBy"    column="update_by"    />
+		<result property="updateTime"    column="update_time"    />
+		<result property="delFlag"    column="del_flag"    />
+		<result property="remark"    column="remark"    />
+		<result property="patchStatus"    column="patch_status"    />
+		<result property="mergePackageFlag"    column="merge_package_flag"    />
+		<result property="configFlag"    column="config_flag"    />
+		<result property="configList"    column="config_list"    />
+		<result property="jiraNo"    column="jira_no"/>
+		<result property="topic"    column="topic"/>
+		<result property="codeList"    column="code_list"    />
+		<result property="realCodeList"    column="real_code_list"    />
+		<result property="compileList"    column="compile_list"    />
+        <result property="patchType"    column="patch_type"    />
+        <result property="autoUpgradeFlag"    column="auto_upgrade_flag"    />
+        <result property="expedited"    column="expedited"    />
+        <result property="taskType"    column="task_type"    />
+        <result property="demandNo"    column="demand_no"    />
+        <result property="demandName"    column="demand_name"    />
+        <result property="bugFlag"    column="bug_flag"    />
+        <result property="bugfixFlag"    column="bugfix_flag"    />
+        <result property="bugfixPatch"    column="bugfix_patch"    />
+        <result property="testStatus"    column="test_status"    />
+	</resultMap>
+
+    <sql id="selectUpPatchClientVo">
+        select patch_id, product_id, product_name, project_id, project_Name, patch_file_name, patch_file_url, sql_flag, up_by, build_time, up_time, create_by, create_time, update_by, update_time, del_flag, remark, patch_status, merge_package_flag, config_flag, config_list, jira_no, topic, code_list, real_code_list, compile_list, patch_type, auto_upgrade_flag, expedited,task_type,demand_no,demand_name,bug_flag,bugfix_flag,bugfix_patch, test_status from up_patch_client
+    </sql>
+
+    <select id="selectUpPatchClientList" parameterType="com.kyee.upgrade.domain.UpPatchClient" resultMap="UpPatchClientResult">
+        <include refid="selectUpPatchClientVo"/>
+        <where>
+            <if test="productName != null and productName != ''"> and product_name = #{productName}</if>
+            <if test="projectName != null and projectName != ''"> and project_name = #{projectName}</if>
+            <if test="jiraNo != null and jiraNo != ''"> and jira_no like concat('%', #{jiraNo}, '%')</if>
+            <if test="topic != null and topic != ''"> and topic like concat('%', #{topic}, '%')</if>
+            <if test="realCodeList != null and realCodeList != ''"> and real_code_list like concat('%', #{realCodeList}, '%')</if>
+            <if test="updateBy != null and updateBy != ''"> and update_by like concat('%', #{updateBy}, '%')</if>
+            <if test="mergePackageFlag != null and mergePackageFlag != ''"> and merge_package_flag = #{mergePackageFlag}</if>
+            <if test="patchStatus != null  and patchStatus != ''"> and patch_status = #{patchStatus}</if>
+            <if test="patchFileName != null  and patchFileName != ''"> and patch_file_name like concat('%', #{patchFileName}, '%')</if>
+            <if test="patchFileUrl != null  and patchFileUrl != ''"> and patch_file_url = #{patchFileUrl}</if>
+            <if test="patchType != null  and patchType != ''"> and patch_type = #{patchType}</if>
+            <if test="sqlFlag != null  and sqlFlag != ''"> and sql_flag = #{sqlFlag}</if>
+            <if test="expedited != null  and expedited != ''"> and expedited = #{expedited}</if>
+            <if test="taskType != null  and taskType != ''"> and task_type = #{taskType}</if>
+            <if test="demandNo != null  and demandNo != ''"> and demand_no like concat('%', #{demandNo}, '%')</if>
+            <if test="demandName != null  and demandName != ''"> and demand_name like concat('%', #{demandName}, '%')</if>
+            <if test="upBy != null  and upBy != ''"> and up_by like concat('%', #{upBy}, '%')</if>
+            <if test="bugfixFlag != null  and bugfixFlag != ''"> and bugfix_flag = #{bugfixFlag}</if>
+            <if test="bugFlag != null  and bugFlag != ''"> and bug_flag = #{bugFlag}</if>
+            <if test="testStatus != null  and testStatus != ''"> and test_status = #{testStatus}</if>
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(build_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(build_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+            and del_flag != 'Y'
+            and merge_package_flag in ('N', 'Y')
+        </where>
+        order by build_time ASC
+    </select>
+    <select id="selectUpPatchClient" parameterType="com.kyee.upgrade.domain.UpPatchClient" resultMap="UpPatchClientResult">
+        <include refid="selectUpPatchClientVo"/>
+        <where>
+            <if test="productName != null and productName != ''"> and product_name = #{productName}</if>
+            <if test="projectName != null and projectName != ''"> and project_name = #{projectName}</if>
+            <if test="jiraNo != null and jiraNo != ''"> and jira_no like concat('%', #{jiraNo}, '%')</if>
+            <if test="topic != null and topic != ''"> and topic like concat('%', #{topic}, '%')</if>
+            <if test="realCodeList != null and realCodeList != ''"> and real_code_list like concat('%', #{realCodeList}, '%')</if>
+            <if test="updateBy != null and updateBy != ''"> and update_by like concat('%', #{updateBy}, '%')</if>
+            <if test="mergePackageFlag != null and mergePackageFlag != ''"> and merge_package_flag = #{mergePackageFlag}</if>
+            <if test="patchStatus != null  and patchStatus != ''"> and patch_status = #{patchStatus}</if>
+            <if test="patchFileName != null  and patchFileName != ''"> and patch_file_name like concat('%', #{patchFileName}, '%')</if>
+            <if test="patchFileUrl != null  and patchFileUrl != ''"> and patch_file_url = #{patchFileUrl}</if>
+            <if test="patchType != null  and patchType != ''"> and patch_type = #{patchType}</if>
+            <if test="sqlFlag != null  and sqlFlag != ''"> and sql_flag = #{sqlFlag}</if>
+            <if test="expedited != null  and expedited != ''"> and expedited = #{expedited}</if>
+            <if test="taskType != null  and taskType != ''"> and task_type = #{taskType}</if>
+            <if test="demandNo != null  and demandNo != ''"> and demand_no like concat('%', #{demandNo}, '%')</if>
+            <if test="demandName != null  and demandName != ''"> and demand_name like concat('%', #{demandName}, '%')</if>
+            <if test="upBy != null  and upBy != ''"> and up_by like concat('%', #{upBy}, '%')</if>
+            <if test="bugfixFlag != null  and bugfixFlag != ''"> and bugfix_flag = #{bugfixFlag}</if>
+            <if test="bugFlag != null  and bugFlag != ''"> and bug_flag = #{bugFlag}</if>
+            <if test="testStatus != null  and testStatus != ''"> and test_status = #{testStatus}</if>
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(build_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(build_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+            and del_flag != 'Y'
+        </where>
+        order by build_time ASC
+    </select>
+	<select id="getUpPatchClientList" parameterType="com.kyee.upgrade.domain.UpPatchClient" resultMap="UpPatchClientExtend">
+		<include refid="selectUpPatchClientVo"/>
+		<where>
+            <if test="productId != null and productId != ''"> and product_id = #{productId}</if>
+            <if test="projectId != null and projectId != ''"> and project_id = #{projectId}</if>
+            <if test="productName != null and productName != ''"> and product_name = #{productName}</if>
+            <if test="projectName != null and projectName != ''"> and project_name = #{projectName}</if>
+			<if test="jiraNo != null and jiraNo != ''"> and jira_no like concat('%', #{jiraNo}, '%')</if>
+			<if test="topic != null and topic != ''"> and topic like concat('%', #{topic}, '%')</if>
+            <if test="realCodeList != null and realCodeList != ''"> and real_code_list like concat('%', #{realCodeList}, '%')</if>
+			<if test="updateBy != null and updateBy != ''"> and update_by like concat('%', #{updateBy}, '%')</if>
+			<if test="mergePackageFlag != null and mergePackageFlag != ''"> and merge_package_flag = #{mergePackageFlag}</if>
+			<if test="patchStatus != null  and patchStatus != ''"> and patch_status = #{patchStatus}</if>
+			<if test="patchFileName != null  and patchFileName != ''"> and patch_file_name like concat('%', #{patchFileName}, '%')</if>
+			<if test="patchFileUrl != null  and patchFileUrl != ''"> and patch_file_url = #{patchFileUrl}</if>
+            <if test="patchType != null  and patchType != ''"> and patch_type = #{patchType}</if>
+			<if test="sqlFlag != null  and sqlFlag != ''"> and sql_flag = #{sqlFlag}</if>
+			<if test="taskType != null  and taskType != ''"> and task_type = #{taskType}</if>
+			<if test="demandNo != null  and demandNo != ''"> and demand_no like concat('%', #{demandNo}, '%')</if>
+			<if test="demandName != null  and demandName != ''"> and demand_name like concat('%', #{demandName}, '%')</if>
+			<if test="upBy != null  and upBy != ''"> and up_by like concat('%', #{upBy}, '%')</if>
+            <if test="bugfixFlag != null  and bugfixFlag != ''"> and bugfix_flag = #{bugfixFlag}</if>
+            <if test="bugFlag != null  and bugFlag != ''"> and bug_flag = #{bugFlag}</if>
+            <if test="testStatus != null  and testStatus != ''"> and test_status = #{testStatus}</if>
+			<if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+				AND date_format(build_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+			</if>
+			<if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+				AND date_format(build_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+			</if>
+            <if test="expedited != null  and expedited != ''"> and expedited = #{expedited}</if>
+            and del_flag != 'Y'
+			and merge_package_flag in ('N', 'Y')
+		</where>
+		order by build_time ASC
+	</select>
+	
+	<select id="selectUpPatchClientListCount" parameterType="com.kyee.upgrade.domain.UpPatchClient" resultType="int">
+		select
+		    count(1)
+		from
+		     up_patch_client
+		<where>
+            <if test="productName != null and productName != ''"> and product_name = #{productName}</if>
+            <if test="projectName != null and projectName != ''"> and project_name = #{projectName}</if>
+			<if test="jiraNo != null and jiraNo != ''"> and jira_no like concat('%', #{jiraNo}, '%')</if>
+			<if test="topic != null and topic != ''"> and topic like concat('%', #{topic}, '%')</if>
+            <if test="realCodeList != null and realCodeList != ''"> and real_code_list like concat('%', #{realCodeList}, '%')</if>
+			<if test="updateBy != null and updateBy != ''"> and update_by like concat('%', #{updateBy}, '%')</if>
+			<if test="mergePackageFlag != null and mergePackageFlag != ''"> and merge_package_flag = #{mergePackageFlag}</if>
+			<if test="patchStatus != null  and patchStatus != ''"> and patch_status = #{patchStatus}</if>
+			<if test="patchFileName != null  and patchFileName != ''"> and patch_file_name like concat('%', #{patchFileName}, '%')</if>
+			<if test="patchFileUrl != null  and patchFileUrl != ''"> and patch_file_url = #{patchFileUrl}</if>
+            <if test="patchType != null  and patchType != ''"> and patch_type = #{patchType}</if>
+			<if test="sqlFlag != null  and sqlFlag != ''"> and sql_flag = #{sqlFlag}</if>
+            <if test="expedited != null  and expedited != ''"> and expedited = #{expedited}</if>
+			<if test="upBy != null  and upBy != ''"> and up_by like concat('%', #{upBy}, '%')</if>
+            <if test="bugfixFlag != null  and bugfixFlag != ''"> and bugfix_flag = #{bugfixFlag}</if>
+            <if test="bugFlag != null  and bugFlag != ''"> and bug_flag = #{bugFlag}</if>
+            <if test="testStatus != null  and testStatus != ''"> and test_status = #{testStatus}</if>
+			<if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+				AND date_format(build_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+			</if>
+			<if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+				AND date_format(build_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+			</if>
+			and del_flag != 'Y'
+			and merge_package_flag in ('N', 'Y')
+		</where>
+	</select>
+    
+    <select id="selectUpPatchClientById" parameterType="Long" resultMap="UpPatchClientResult">
+        <include refid="selectUpPatchClientVo"/>
+        where patch_id = #{patchId}
+        and del_flag != 'Y'
+    </select>
+    <select id="selectUpPatchClientByName" parameterType="String" resultMap="UpPatchClientResult">
+        <include refid="selectUpPatchClientVo"/>
+        where patch_file_name = #{bugPatchFileName}
+        and del_flag != 'Y'
+    </select>
+    
+    <insert id="insertUpPatchClient" parameterType="com.kyee.upgrade.domain.UpPatchClient" useGeneratedKeys="true" keyProperty="patchId">
+        insert into up_patch_client
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="productId != null">product_id,</if>
+            <if test="productName != null">product_name,</if>
+	        <if test="projectId != null">project_id,</if>
+            <if test="projectName != null">project_name,</if>
+            <if test="patchFileName != null and patchFileName != ''">patch_file_name,</if>
+            <if test="patchFileUrl != null and patchFileUrl != ''">patch_file_url,</if>
+            <if test="sqlFlag != null and sqlFlag != ''">sql_flag,</if>
+            <if test="upBy != null">up_by,</if>
+            <if test="buildTime != null and buildTime != ''">build_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+            <if test="remark != null">remark,</if>
+            <if test="jiraNo != null">jira_no,</if>
+            <if test="topic != null">topic,</if>
+            <if test="patchStatus != null">patch_status,</if>
+            <if test="codeList != null">code_list,</if>
+            <if test="realCodeList != null">real_code_list,</if>
+            <if test="mergePackageFlag != null">merge_package_flag,</if>
+            <if test="configFlag != null">config_flag,</if>
+            <if test="configList != null">config_list,</if>
+            <if test="compileList != null">compile_list,</if>
+            <if test="patchType != null">patch_type,</if>
+            <if test="autoUpgradeFlag != null">auto_upgrade_flag,</if>
+            <if test="expedited != null and expedited != ''">expedited,</if>
+            <if test="taskType != null and taskType != ''">task_type,</if>
+            <if test="demandNo != null and demandNo != ''">demand_no,</if>
+            <if test="bugFlag != null and bugFlag != ''">bug_flag,</if>
+            <if test="bugfixFlag != null and bugfixFlag != ''">bugfix_flag,</if>
+            <if test="bugfixPatch != null and bugfixPatch != ''">bugfix_patch,</if>
+            <if test="demandName != null and demandName != ''">demand_name,</if>
+            <if test="testStatus != null and testStatus != ''">test_status</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+	        <if test="productId != null">#{productId},</if>
+            <if test="productName != null">#{productName},</if>
+	        <if test="projectId != null">#{projectId},</if>
+            <if test="projectName != null">#{projectName},</if>
+            <if test="patchFileName != null and patchFileName != ''">#{patchFileName},</if>
+            <if test="patchFileUrl != null and patchFileUrl != ''">#{patchFileUrl},</if>
+            <if test="sqlFlag != null and sqlFlag != ''">#{sqlFlag},</if>
+            <if test="upBy != null">#{upBy},</if>
+            <if test="buildTime != null and buildTime != ''">#{buildTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="jiraNo != null">#{jiraNo},</if>
+            <if test="topic != null">#{topic},</if>
+            <if test="patchStatus != null">#{patchStatus},</if>
+            <if test="codeList != null">#{codeList},</if>
+            <if test="realCodeList != null">#{realCodeList},</if>
+            <if test="mergePackageFlag != null">#{mergePackageFlag},</if>
+            <if test="configFlag != null">#{configFlag},</if>
+            <if test="configList != null">#{configList},</if>
+            <if test="compileList != null">#{compileList},</if>
+            <if test="patchType != null">#{patchType},</if>
+            <if test="autoUpgradeFlag != null">#{autoUpgradeFlag},</if>
+            <if test="expedited != null and expedited != ''">#{expedited},</if>
+            <if test="taskType != null and taskType != ''">#{taskType},</if>
+            <if test="demandNo != null and demandNo != ''">#{demandNo},</if>
+            <if test="bugFlag != null and bugFlag != ''">#{bugFlag},</if>
+            <if test="bugfixFlag != null and bugfixFlag != ''">#{bugfixFlag},</if>
+            <if test="bugfixPatch != null and bugfixPatch != ''">#{bugfixPatch},</if>
+            <if test="demandName != null and demandName != ''">#{demandName},</if>
+            <if test="testStatus != null and testStatus != ''">#{testStatus}</if>
+         </trim>
+    </insert>
+
+    <update id="updateUpPatchClient" parameterType="UpPatchClient">
+        update up_patch_client
+        <trim prefix="SET" suffixOverrides=",">
+	        <if test="productId != null">product_Id = #{productId},</if>
+            <if test="productName != null">product_name = #{productName},</if>
+	        <if test="projectId != null">project_Id = #{projectId},</if>
+            <if test="projectName != null">project_name = #{projectName},</if>
+            <if test="patchFileName != null and patchFileName != ''">patch_file_name = #{patchFileName},</if>
+            <if test="patchFileUrl != null and patchFileUrl != ''">patch_file_url = #{patchFileUrl},</if>
+            <if test="sqlFlag != null and sqlFlag != ''">sql_flag = #{sqlFlag},</if>
+            <if test="upBy != null">up_by = #{upBy},</if>
+            <if test="buildTime != null and buildTime != ''">build_time = #{buildTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="jiraNo != null">jira_no = #{jiraNo},</if>
+            <if test="topic != null">topic = #{topic},</if>
+            <if test="patchStatus != null">patch_status = #{patchStatus},</if>
+            <if test="codeList != null">code_list = #{codeList},</if>
+            <if test="realCodeList != null">real_code_list = #{realCodeList},</if>
+            <if test="mergePackageFlag != null">merge_package_flag = #{mergePackageFlag},</if>
+            <if test="configFlag != null">config_flag = #{configFlag},</if>
+            <if test="configList != null">config_list = #{configList},</if>
+            <if test="compileList != null">compile_list = #{compileList},</if>
+            <if test="patchType != null">patch_type = #{patchType},</if>
+            <if test="autoUpgradeFlag != null">auto_upgrade_flag = #{autoUpgradeFlag},</if>
+            <if test="expedited != null and expedited != ''">expedited = #{expedited},</if>
+            <if test="taskType != null and taskType != ''">task_type = #{taskType},</if>
+            <if test="demandNo != null and demandNo != ''">demand_no = #{demandNo},</if>
+            <if test="bugFlag != null and bugFlag != ''">bug_flag = #{bugFlag},</if>
+            <if test="bugfixFlag != null and bugfixFlag != ''">bugfix_flag = #{bugfixFlag},</if>
+            <if test="bugfixPatch != null and bugfixPatch != ''">bugfix_patch = #{bugfixPatch},</if>
+            <if test="demandName != null and demandName != ''">demand_name = #{demandName},</if>
+            <if test="testStatus != null and testStatus != ''">test_status = #{testStatus}</if>
+        </trim>
+        where patch_id = #{patchId}
+    </update>
+	
+	<update id="updateUpPatchClientStatus">
+		update up_patch_client
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="patchStatus != null">patch_status = #{patchStatus},</if>
+		</trim>
+		where patch_id = #{patchId}
+	</update>
+
+    <delete id="deleteUpPatchClientById" parameterType="Long">
+        update up_patch_client set del_flag = 'Y', update_time=sysdate() where patch_id = #{patchId}
+    </delete>
+
+    <delete id="deleteUpPatchClientChildByParentPatchId" parameterType="String">
+        update up_patch_client set del_flag = 'Y', update_time=sysdate() where merge_package_flag = #{parentPatchId}
+    </delete>
+
+    <delete id="deleteUpPatchClientByIds" parameterType="String">
+        update up_patch_client set del_flag = 'Y', update_time=sysdate() where patch_id in
+        <foreach item="patchId" collection="array" open="(" separator="," close=")">
+            #{patchId}
+        </foreach>
+    </delete>
+
+    <select id="selectUpPatchListByParentPatchId" resultMap="UpPatchClientResult">
+        <include refid="selectUpPatchClientVo"/>
+        where
+        merge_package_flag = #{parentPatchId}
+        and del_flag != 'Y'
+        order by build_time desc
+    </select>
+
+
+    <select id="getLastInsertId" resultType="long">
+        SELECT LAST_INSERT_ID() AS id
+    </select>
+
+    <update id="updateUpPatchClientChild" parameterType="UpPatchClient">
+        update up_patch_client
+        <trim prefix="SET" suffixOverrides=",">
+	        <if test="productId != null">product_Id = #{productId},</if>
+            <if test="productName != null">product_name = #{productName},</if>
+	        <if test="projectId != null">project_Id = #{projectId},</if>
+            <if test="projectName != null">project_name = #{projectName},</if>
+            <if test="patchFileName != null and patchFileName != ''">patch_file_name = #{patchFileName},</if>
+            <if test="patchFileUrl != null and patchFileUrl != ''">patch_file_url = #{patchFileUrl},</if>
+            <if test="sqlFlag != null and sqlFlag != ''">sql_flag = #{sqlFlag},</if>
+            <if test="upBy != null">up_by = #{upBy},</if>
+            <if test="buildTime != null and buildTime != ''">build_time = #{buildTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="jiraNo != null">jira_no = #{jiraNo},</if>
+            <if test="topic != null">topic = #{topic},</if>
+            <if test="patchStatus != null">patch_status = #{patchStatus},</if>
+            <if test="codeList != null">code_list = #{codeList},</if>
+            <if test="realCodeList != null">real_code_list = #{realCodeList},</if>
+            <if test="mergePackageFlag != null">merge_package_flag = #{mergePackageFlag},</if>
+            <if test="configFlag != null">config_flag = #{configFlag},</if>
+            <if test="configList != null">config_list = #{configList},</if>
+            <if test="compileList != null">compile_list = #{compileList},</if>
+            <if test="patchType != null">patch_type = #{patchType},</if>
+            <if test="autoUpgradeFlag != null">auto_upgrade_flag = #{autoUpgradeFlag},</if>
+            <if test="expedited != null and expedited != ''">expedited = #{expedited},</if>
+            <if test="testStatus != null and testStatus != ''">test_status = #{testStatus},</if>
+        </trim>
+        where merge_package_flag = CONCAT(#{patchId}, '')
+    </update>
+	
+	<select id="getPatchAndSubPatchById" parameterType="Long" resultMap="UpPatchClientResult">
+		<include refid="selectUpPatchClientVo"/>
+		where patch_id = #{patchId}
+		or merge_package_flag = #{patchId}
+		and del_flag != 'Y'
+	</select>
+	
+	<update id="updatePatchAndSubPatchById" parameterType="com.kyee.upgrade.domain.UpPatchClient">
+		update up_patch_client
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="productId != null">product_Id = #{productId},</if>
+			<if test="productName != null">product_name = #{productName},</if>
+			<if test="projectId != null">project_Id = #{projectId},</if>
+			<if test="projectName != null">project_name = #{projectName},</if>
+			<if test="patchFileName != null and patchFileName != ''">patch_file_name = #{patchFileName},</if>
+			<if test="patchFileUrl != null and patchFileUrl != ''">patch_file_url = #{patchFileUrl},</if>
+			<if test="sqlFlag != null and sqlFlag != ''">sql_flag = #{sqlFlag},</if>
+			<if test="upBy != null">up_by = #{upBy},</if>
+			<if test="buildTime != null and buildTime != ''">build_time = #{buildTime},</if>
+			<if test="createBy != null">create_by = #{createBy},</if>
+			<if test="createTime != null">create_time = #{createTime},</if>
+			<if test="updateBy != null">update_by = #{updateBy},</if>
+			<if test="updateTime != null">update_time = #{updateTime},</if>
+			<if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+			<if test="remark != null">remark = #{remark},</if>
+			<if test="jiraNo != null">jira_no = #{jiraNo},</if>
+			<if test="topic != null">topic = #{topic},</if>
+			<if test="patchStatus != null">patch_status = #{patchStatus},</if>
+			<if test="codeList != null">code_list = #{codeList},</if>
+			<if test="realCodeList != null">real_code_list = #{realCodeList},</if>
+			<if test="configFlag != null">config_flag = #{configFlag},</if>
+			<if test="configList != null">config_list = #{configList},</if>
+			<if test="compileList != null">compile_list = #{compileList},</if>
+            <if test="patchType != null">patch_type = #{patchType},</if>
+            <if test="autoUpgradeFlag != null">auto_upgrade_flag = #{autoUpgradeFlag},</if>
+            <if test="expedited != null and expedited != ''">expedited = #{expedited},</if>
+            <if test="testStatus != null and testStatus != ''">test_status = #{testStatus}</if>
+		</trim>
+		where patch_id = #{patchId}
+        <if test="mergePackageFlag != null and mergePackageFlag != 'N'.toString()">
+          or merge_package_flag = #{mergePackageFlag}
+        </if>
+
+	</update>
+
+    <update id="updateBugFlag" parameterType="map">
+        update up_patch_client
+        set bug_flag = 'Y'
+        where patch_file_name = #{bugPatchFileName}
+    </update>
+    <update id="updateBugfixPatch" >
+        update up_patch_client
+        set bugfix_patch = #{patchId}
+        where patch_file_name = #{bugPatchFileName}
+    </update>
+
+    <select id="selectPatchFileName" parameterType="com.kyee.upgrade.domain.UpPatchClient" resultType="string">
+        select patch_file_name from up_patch_client
+        <where>
+            <if test="productName != null and productName != ''"> and product_name = #{productName}</if>
+            <if test="projectName != null and projectName != ''"> and project_name = #{projectName}</if>
+            <if test="jiraNo != null and jiraNo != ''"> and jira_no like concat('%', #{jiraNo}, '%')</if>
+            <if test="topic != null and topic != ''"> and topic like concat('%', #{topic}, '%')</if>
+            <if test="realCodeList != null and realCodeList != ''"> and real_code_list like concat('%', #{realCodeList}, '%')</if>
+            <if test="updateBy != null and updateBy != ''"> and update_by like concat('%', #{updateBy}, '%')</if>
+            <if test="mergePackageFlag != null and mergePackageFlag != ''"> and merge_package_flag = #{mergePackageFlag}</if>
+            <if test="patchStatus != null  and patchStatus != ''"> and patch_status = #{patchStatus}</if>
+            <if test="patchFileName != null  and patchFileName != ''"> and patch_file_name like concat('%', #{patchFileName}, '%')</if>
+            <if test="patchFileUrl != null  and patchFileUrl != ''"> and patch_file_url = #{patchFileUrl}</if>
+            <if test="patchType != null  and patchType != ''"> and patch_type = #{patchType}</if>
+            <if test="sqlFlag != null  and sqlFlag != ''"> and sql_flag = #{sqlFlag}</if>
+            <if test="testStatus != null  and testStatus != ''"> and test_status = #{testStatus}</if>
+            <if test="upBy != null  and upBy != ''"> and up_by like concat('%', #{upBy}, '%')</if>
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(build_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(build_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+            <if test="expedited != null and expedited != ''"> and expedited = #{expedited}</if>
+            and del_flag != 'Y'
+            and merge_package_flag in ('N', 'Y')
+        </where>
+    </select>
+
+    <select id="getUpPatchListBySonPackage" parameterType="com.kyee.upgrade.domain.UpPatchClient" resultMap="UpPatchClientExtend">
+        <include refid="selectUpPatchClientVo"/>
+        <where>
+            <if test="patchFileName != null  and patchFileName != ''">and patch_id = (SELECT MAX(merge_package_flag) FROM up_patch_client WHERE patch_file_name = #{patchFileName})</if>
+            and del_flag != 'Y'
+            and merge_package_flag in ('N', 'Y')
+        </where>
+        order by build_time ASC
+    </select>
+
+    <select id="getPatchByRepeatValidate" resultMap="UpPatchClientResult">
+        <include refid="selectUpPatchClientVo"/>
+        <where>
+            product_id = #{productId}
+            and project_id = #{projectId}
+            and del_flag != 'Y'
+            and merge_package_flag in ('N', 'Y')
+            and patch_status = #{patchStatus}
+            and patch_id != #{patchId}
+            and build_time &lt; #{buildTime}
+        </where>
+    </select>
+</mapper>
